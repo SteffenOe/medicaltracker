@@ -2,7 +2,8 @@ import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-class Config:
+class Config:    
+    """Konfiguration"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-medical-tracker'
     
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
