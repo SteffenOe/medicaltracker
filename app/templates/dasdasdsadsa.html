@@ -10,13 +10,13 @@
             {% if patient %}
                 <h1 class="h3 fw-bold mb-0">Medikationsübersicht – Patient: {{ patient.vorname }} {{ patient.nachname }}</h1>
             {% else %}
-                <h1 class="h3 fw-bold mb-0">Angehörigen-Dashboard (Verwaltungsmodus)</h1>
+                <h1 class="h3 fw-bold mb-0">Angehörigen-Dashboard (Verwaltungsmodussss)</h1>
             {% endif %}
         </div>
         <!-- Aktions-Buttons oben rechts (Abbildung 4) -->
         <div class="d-flex gap-2">
-            <a href="#" class="btn btn-primary fw-semibold shadow-sm">
-                <i class="bi bi-plus-lg me-1"></i> Neues Medikament
+            <a href="{{ url_for('medikamente.neu') }}" class="btn btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Neues Medikaments
             </a>
             <a href="#" class="btn btn-success fw-semibold shadow-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i> PDF-Bericht generieren
