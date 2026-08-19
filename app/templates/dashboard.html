@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Medical Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Angehörigen-Dashboard</h1>
+            {% if patient %}
+                <p class="text-muted mb-0">Betreuter Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geburtsdatum: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
+            {% endif %}
+        </div>
+        <div class="d-flex gap-2">
+            <a href="#" class="btn btn-outline-primary fw-semibold shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> + Vitalwert
+            </a>
+            <a href="{{ url_for('medikamente.neu') }}" class="btn btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> + Neues Medikament
+            </a>
+            <a href="#" class="btn btn-success fw-semibold shadow-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i> PDF-Arztbericht
+            </a>
+        </div>
+    </div>
+
+    {% if not patient %}
+        <div class="alert alert-warning shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> Kein Patient vorhanden. Führen Sie <code>python seed.py</code> aus, um Testdaten anzulegen.
+        </div>
+    {% endif %}
+
+    {% if kritische_medikamente %}
+        <div class="alert alert-danger shadow-sm mb-3 border-start border-danger border-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-octagon-fill fs-3 me-3 text-danger"></i>
+                <div>
+                    <h5 class="alert-heading fw-bold mb-1">Achtung: Nachbestellung erforderlich!</h5>
+                    <p class="mb-0">Folgende Medikamente haben ihren Mindestbestand erreicht oder unterschritten: 
+                        <strong>{% for m in kritische_medikamente %}{{ m.name }} (Rest: {{ m.bestand }} Stk.){% if not loop.last %}, {% endif %}{% endfor %}</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if ueberfaellige_einnahmen %}
+        <div class="alert alert-warning shadow-sm mb-4 border-start border-warning border-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-clock-history fs-3 me-3 text-warning"></i>
+                <div>
+                    <h5 class="alert-heading fw-bold mb-1">Achtung: Ausstehende Einnahmen überfällig!</h5>
+                    <p class="mb-0">Folgende Medikamente wurden heute noch nicht wie geplant eingenommen: 
+                        <strong>{% for m in ueberfaellige_einnahmen %}{{ m.name }} (Geplant: {{ m.tageszeit }}){% if not loop.last %}, {% endif %}{% endfor %}</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-primary">
+                        <i class="bi bi-capsule me-2"></i>Aktueller Medikationsplan
+                    </h5>
+                    <a href="{{ url_for('medikamente.index') }}" class="btn btn-sm btn-outline-primary">
+                        Alle verwalten <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if medikamente %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Medikament</th>
+                                        <th>Dosierung</th>
+                                        <th>Tageszeit</th>
+                                        <th>Bestand</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for med in medikamente %}
+                                    <tr>
+                                        <td class="ps-3 fw-bold">{{ med.name }}</td>
+                                        <td>{{ med.dosierung }}</td>
+                                        <td><span class="badge bg-secondary">{{ med.tageszeit }}</span></td>
+                                        <td>
+                                            {% if med.bestand <= med.mindestbestand %}
+                                                <span class="badge bg-danger px-2 py-1">{{ med.bestand }} Stk. (Niedrig)</span>
+                                            {% else %}
+                                                <span class="badge bg-success px-2 py-1">{{ med.bestand }} Stk. (OK)</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-muted text-center">Keine Medikamente erfasst.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-danger">
+                        <i class="bi bi-heart-pulse me-2"></i>Letzte Vitalwerte
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if vitalwerte %}
+                        <ul class="list-group list-group-flush">
+                            {% for v in vitalwerte %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <strong class="d-block text-dark">{{ v.kategorie }}</strong>
+                                        <small class="text-muted">{{ v.zeitpunkt.strftime('%d.%m.%Y um %H:%M Uhr') }}</small>
+                                    </div>
+                                    <span class="fs-5 fw-bold text-primary">
+                                        {{ v.wert }} <small class="fs-6 text-muted">{{ v.einheit }}</small>
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="p-4 text-muted text-center">Noch keine Vitalwerte dokumentiert.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title fw-bold mb-0 text-warning text-dark">
+                        <i class="bi bi-calendar-event me-2"></i>Anstehende Pflegetermine & Aufgaben
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if termine %}
+                        <ul class="list-group list-group-flush">
+                            {% for t in termine %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <strong class="text-dark">{{ t.titel }}</strong>
+                                        <span class="badge bg-secondary ms-2">{{ t.kategorie }}</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="fw-semibold text-primary d-block">{{ t.zeitpunkt.strftime('%d.%m.%Y') }}</span>
+                                        <small class="text-muted">{{ t.zeitpunkt.strftime('%H:%M Uhr') }}</small>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="p-4 text-muted text-center">Keine anstehenden Termine vorhanden.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm bg-primary text-white p-3">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-bounding-box display-4 mb-3 d-block"></i>
+                    <h4 class="fw-bold mb-2">Barrierefreier Patientenmodus</h4>
+                    <p class="small text-white-50 mb-3">Umschalten auf die Tagesansicht für den Patienten.</p>
+                    <a href="{{ url_for('patient.tagesansicht') }}" class="btn btn-light text-primary fw-bold w-100 shadow-sm py-2">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Patientenansicht öffnen
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

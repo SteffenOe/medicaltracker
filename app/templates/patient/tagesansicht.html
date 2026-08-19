@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patientenmodus - Medical Tracker</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* 1. Sanftes Scrollen aktivieren */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 2. WCAG 2.2 Typografie & Kontraste (NFA-01) */
+        body {
+            font-size: 1.25rem; /* Basis >= 18pt */
+            background-color: #f8f9fa;
+            color: #212529;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            padding-bottom: 60px;
+        }
+
+        /* 3. Schlanker, unaufdringlicher Sticky-Header */
+        .compact-header {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            background-color: rgba(255, 255, 255, 0.98);
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            padding: 0.6rem 0;
+        }
+
+        /* 4. Behebung des Scroll-Offsets: Exakter Abstand unter dem Sticky-Header */
+        .section-anchor {
+            scroll-margin-top: 85px; /* Verhindert das Verdecken durch den Header */
+        }
+
+        /* 5. Minimalistische, taktile Schnell-Navigations-Chips */
+        .nav-chip {
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            transition: transform 0.1s ease;
+        }
+        .nav-chip:active {
+            transform: scale(0.96);
+        }
+
+        /* 6. Ergonomische Medikamentenkarten & Touch-Targets (WCAG 2.2) */
+        .patient-card {
+            border: 2px solid #dee2e6;
+            border-radius: 0.85rem;
+            background-color: #ffffff;
+        }
+        .patient-card.card-overdue {
+            border: 2px solid #fd7e14 !important;
+            background-color: #fffaf5;
+        }
+        .patient-card.card-done {
+            border: 1px solid #ced4da;
+            background-color: #fdfdfd;
+            opacity: 0.85;
+        }
+
+        .btn-einnahme {
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding: 0.85rem;
+            border-radius: 0.65rem;
+            min-height: 54px; /* Touch-Target >= 48px */
+        }
+
+        .eingenommen-badge {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            border: 1px solid #c8e6c9;
+            border-radius: 0.65rem;
+            padding: 0.75rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Schlanker, dezenter Header -->
+    <header class="compact-header mb-4">
+        <div class="container" style="max-width: 780px;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <h1 class="h5 fw-bold mb-0 text-dark">
+                        {{ heute.strftime('%A, %d. %B') }}
+                    </h1>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge {% if erledigt_anzahl == gesamt_anzahl and gesamt_anzahl > 0 %}bg-success{% else %}bg-secondary{% endif %}">
+                        {{ erledigt_anzahl }}/{{ gesamt_anzahl }} erledigt
+                    </span>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm" title="Zum Verwaltungs-Dashboard">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Kompakte Tageszeiten-Chips -->
+            {% if gruppierte_medikamente %}
+                <div class="d-flex gap-2 overflow-auto pb-1" style="scrollbar-width: none;">
+                    {% for tz, med_liste in gruppierte_medikamente.items() %}
+                        {% set alle_erledigt = med_liste | map(attribute='eingenommen') | select('equalto', true) | list | length == med_liste | length %}
+                        {% set hat_ueberfaellig = med_liste | map(attribute='ueberfaellig') | select('equalto', true) | list | length > 0 %}
+
+                        <a href="#section-{{ tz }}" 
+                           class="nav-chip {% if alle_erledigt %}bg-light text-success border border-success{% elif hat_ueberfaellig %}bg-warning-subtle text-dark border border-warning{% else %}bg-white text-secondary border{% endif %}">
+                            {% if alle_erledigt %}
+                                <i class="bi bi-check-circle-fill"></i>
+                            {% elif hat_ueberfaellig %}
+                                <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                            {% endif %}
+                            {{ tz }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Barrierefreier Hauptinhalt -->
+    <main class="container" style="max-width: 780px;">
+
+        {% if gruppierte_medikamente %}
+            {% for tz, med_liste in gruppierte_medikamente.items() %}
+                
+                <!-- Abschnittsüberschrift mit Scroll-Margin-Anchor -->
+                <div id="section-{{ tz }}" class="section-anchor pt-2 pb-2 mb-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h2 class="h5 fw-bold text-secondary mb-0 text-uppercase tracking-wide">
+                        <i class="bi bi-clock me-1"></i> {{ tz }}
+                    </h2>
+                    <small class="text-muted">{{ med_liste | length }} Dosis</small>
+                </div>
+
+                <div class="d-flex flex-column gap-3 mb-4">
+                    {% for item in med_liste %}
+                        <div class="card patient-card shadow-sm p-3 {% if item.eingenommen %}card-done{% elif item.ueberfaellig %}card-overdue{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h3 class="h4 fw-bold text-dark mb-1">{{ item.medikament.name }}</h3>
+                                    <p class="text-muted mb-0">Dosis: <strong class="text-dark">{{ item.medikament.dosierung }}</strong></p>
+                                </div>
+                                {% if item.ueberfaellig %}
+                                    <span class="badge bg-warning text-dark fs-6">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Überfällig
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mt-2">
+                                {% if item.eingenommen %}
+                                    <div class="eingenommen-badge text-center">
+                                        <i class="bi bi-check-lg me-1"></i> Eingenommen ({{ item.zeitpunkt.strftime('%H:%M Uhr') }})
+                                    </div>
+                                {% else %}
+                                    <form method="POST" action="{{ url_for('patient.einnehmen', medikament_id=item.medikament.id) }}">
+                                        <button type="submit" class="btn {% if item.ueberfaellig %}btn-warning text-dark{% else %}btn-success{% endif %} btn-einnahme w-100 shadow-sm">
+                                            <i class="bi bi-check2-circle me-2"></i> Als eingenommen markieren
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info p-4 text-center rounded-3 shadow-sm">
+                <i class="bi bi-info-circle fs-2 d-block mb-2"></i>
+                <h3 class="h5 fw-bold">Keine Medikamente für heute eingetragen.</h3>
+            </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
