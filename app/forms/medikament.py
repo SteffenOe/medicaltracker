@@ -24,12 +24,12 @@ class MedikamentForm(FlaskForm):
     
     bestand = IntegerField('Aktueller Bestand (Packungsinhalt)', validators=[
         DataRequired(message="Bitte erfassen Sie den Anfangsbestand."),
-        NumberRange(min=0, message="Der Bestand darf nicht negativ sein (GR-01).")
+        NumberRange(min=0, message="Der Bestand darf nicht negativ sein.")
     ], default=20)
     
     mindestbestand = IntegerField('Mindestbestand (Warnschwelle)', validators=[
         DataRequired(message="Bitte definieren Sie einen Mindestbestand."),
-        NumberRange(min=0, message="Der Mindestbestand darf nicht negativ sein (GR-01).")
+        NumberRange(min=0, message="Der Mindestbestand darf nicht negativ sein.")
     ], default=5)
     
     submit = SubmitField('Medikament speichern')

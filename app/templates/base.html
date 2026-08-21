@@ -79,7 +79,10 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a
+              class="nav-link {% if request.blueprint == 'vitaldaten' %}active{% endif %}"
+              href="{{ url_for('vitaldaten.index') }}"
+            >
               <i class="bi bi-heart-pulse"></i> Vitaldaten
             </a>
           </li>

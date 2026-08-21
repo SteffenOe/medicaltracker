@@ -1,6 +1,5 @@
 import os
 from app import create_app, db
-from app.models import Patient, Medikament, EinnahmeProtokoll, Vitalwert, Termin
 from config import BASE_DIR
 
 app = create_app()

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Vitalwert erfassen - Medical Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h1 class="h3 fw-bold mb-0">Neuen Vitalwert erfassen</h1>
+        <a href="{{ url_for('vitaldaten.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Zurück zur Übersicht
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <form method="POST" novalidate id="vitalForm">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-4">
+                            {{ form.kategorie.label(class="form-label fw-bold") }}
+                            {{ form.kategorie(class="form-select form-select-lg", id="katSelect") }}
+                            {% for error in form.kategorie.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div id="blutdruckFelder" class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.systolisch.label(class="form-label fw-bold") }}
+                                {{ form.systolisch(class="form-control form-control-lg" + (" is-invalid" if form.systolisch.errors else ""), placeholder="z. B. 120", type="number", step="1") }}
+                                {% for error in form.systolisch.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                                <small class="text-muted">Normbereich: 90–140 mmHg (Max: 300 mmHg)</small>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.diastolisch.label(class="form-label fw-bold") }}
+                                {{ form.diastolisch(class="form-control form-control-lg" + (" is-invalid" if form.diastolisch.errors else ""), placeholder="z. B. 80", type="number", step="1") }}
+                                {% for error in form.diastolisch.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                                <small class="text-muted">Muss kleiner als Systole sein.</small>
+                            </div>
+                        </div>
+
+                        <div id="einzelwertFeld" class="mb-4" style="display: none;">
+                            <label id="einzelwertLabel" class="form-label fw-bold">Messwert</label>
+                            {{ form.einzelwert(class="form-control form-control-lg" + (" is-invalid" if form.einzelwert.errors else ""), placeholder="Wert eingeben", type="number", step="0.1") }}
+                            {% for error in form.einzelwert.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <small id="einzelwertHelp" class="text-muted"></small>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('vitaldaten.index') }}" class="btn btn-light border">Abbrechen</a>
+                            {{ form.submit(class="btn btn-primary fw-semibold px-4") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const select = document.getElementById('katSelect');
+        const bdFields = document.getElementById('blutdruckFelder');
+        const singleField = document.getElementById('einzelwertFeld');
+        const label = document.getElementById('einzelwertLabel');
+        const help = document.getElementById('einzelwertHelp');
+
+        function updateFields() {
+            if (select.value === 'Blutdruck') {
+                bdFields.style.display = 'flex';
+                singleField.style.display = 'none';
+            } else if (select.value === 'Puls') {
+                bdFields.style.display = 'none';
+                singleField.style.display = 'block';
+                label.innerText = 'Pulsfrequenz (bpm)';
+                help.innerText = 'Gültiger Bereich: 30 bis 250 Schläge/Minute.';
+            } else if (select.value === 'Gewicht') {
+                bdFields.style.display = 'none';
+                singleField.style.display = 'block';
+                label.innerText = 'Körpergewicht (kg)';
+                help.innerText = 'Gültiger Bereich: 2,0 bis 300,0 kg.';
+            }
+        }
+
+        select.addEventListener('change', updateFields);
+        updateFields();
+    });
+</script>
+{% endblock %}

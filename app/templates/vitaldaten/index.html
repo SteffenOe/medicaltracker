@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Vitaldaten-Historie - Medical Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h3 fw-bold mb-0">Vitaldaten-Historie</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('vitaldaten.neu') }}" class="btn btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> + Neuen Messwert erfassen
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            {% if vitalwerte %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Datum & Uhrzeit</th>
+                                <th>Kategorie</th>
+                                <th>Messwert</th>
+                                <th>Einheit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in vitalwerte %}
+                            <tr>
+                                <td class="ps-4 fw-semibold text-dark">{{ v.zeitpunkt.strftime('%d.%m.%Y um %H:%M:%S Uhr') }}</td>
+                                <td>
+                                    {% if 'Blutdruck' in v.kategorie %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-heart-pulse me-1"></i> {{ v.kategorie }}
+                                        </span>
+                                    {% elif v.kategorie == 'Puls' %}
+                                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle">
+                                            <i class="bi bi-activity me-1"></i> Puls
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-info-subtle text-dark border border-info-subtle">
+                                            <i class="bi bi-speedometer me-1"></i> Körpergewicht
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="fs-5 fw-bold text-primary">{{ v.wert }}</td>
+                                <td class="text-muted">{{ v.einheit }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-heart-pulse display-4 d-block mb-3 text-secondary"></i>
+                    <h5>Keine Vitaldaten dokumentiert</h5>
+                    <p class="small text-muted mb-3">Erfassen Sie die erste Blutdruck-, Puls- oder Gewichtsmessung.</p>
+                    <a href="{{ url_for('vitaldaten.neu') }}" class="btn btn-primary btn-sm fw-semibold">
+                        + Ersten Messwert eintragen
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
