@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Terminverwaltung - Medical Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h3 fw-bold mb-0">Pflegetermine & Aufgaben</h1>
+            {% if patient %}
+                <p class="text-muted mb-0">Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong></p>
+            {% endif %}
+        </div>
+        <a href="{{ url_for('termine.neu') }}" class="btn btn-primary fw-semibold shadow-sm">
+            <i class="bi bi-calendar-plus me-1"></i> + Neuer Termin
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0 text-primary">
+                <i class="bi bi-clock-history me-2"></i>Anstehende Termine
+            </h5>
+            <span class="badge bg-primary fs-6">{{ offene_termine|length }} Offen</span>
+        </div>
+        <div class="card-body p-0">
+            {% if offene_termine %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4" style="width: 50px;">Status</th>
+                                <th>Termin / Aufgabe</th>
+                                <th>Kategorie</th>
+                                <th>Datum & Uhrzeit</th>
+                                <th class="text-end pe-4">Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in offene_termine %}
+                            <tr>
+                                <td class="ps-4">
+                                    <form method="POST" action="{{ url_for('termine.toggle', id=t.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Als erledigt abhaken">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="fw-bold text-dark">{{ t.titel }}</td>
+                                <td><span class="badge bg-secondary">{{ t.kategorie }}</span></td>
+                                <td class="fw-semibold text-primary">
+                                    <i class="bi bi-calendar3 me-1"></i>{{ t.zeitpunkt.strftime('%d.%m.%Y um %H:%M Uhr') }}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('termine.bearbeiten', id=t.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delModal{{ t.id }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                    <div class="modal fade text-start" id="delModal{{ t.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold text-danger">Termin löschen</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Möchten Sie den Termin <strong>{{ t.titel }}</strong> wirklich entfernen?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Abbrechen</button>
+                                                    <form method="POST" action="{{ url_for('termine.loeschen', id=t.id) }}">
+                                                        <button type="submit" class="btn btn-danger">Löschen</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="p-4 text-center text-muted">Keine anstehenden Termine vorhanden.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if erledigte_termine %}
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-light py-2">
+            <h6 class="fw-bold mb-0 text-secondary">
+                <i class="bi bi-check2-circle me-2"></i>Erledigte Aufgaben / Vergangene Termine ({{ erledigte_termine|length }})
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-muted">
+                    <tbody>
+                        {% for t in erledigte_termine %}
+                        <tr class="table-light">
+                            <td class="ps-4" style="width: 50px;">
+                                <form method="POST" action="{{ url_for('termine.toggle', id=t.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Wieder als offen markieren">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="text-decoration-line-through">{{ t.titel }}</td>
+                            <td><span class="badge bg-light text-secondary border">{{ t.kategorie }}</span></td>
+                            <td>{{ t.zeitpunkt.strftime('%d.%m.%Y um %H:%M Uhr') }}</td>
+                            <td class="text-end pe-4">
+                                <form method="POST" action="{{ url_for('termine.loeschen', id=t.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Löschen">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

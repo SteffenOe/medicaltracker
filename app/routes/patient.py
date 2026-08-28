@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from flask import Blueprint, render_template, redirect, url_for, flash
 from app import db
-from app.models import Patient, Medikament, EinnahmeProtokoll
+from app.models import Patient, Medikament, EinnahmeProtokoll, Termin
 from app.utils import ist_einnahme_ueberfaellig
 
 patient_bp = Blueprint('patient', __name__, url_prefix='/patient')
@@ -17,8 +17,14 @@ def tagesansicht():
     gruppierte_medikamente = {}
     gesamt_anzahl = 0
     erledigt_anzahl = 0
+    termine_heute = []
     
     if patient:
+        termine_heute = Termin.query.filter(
+            Termin.patient_id == patient.id,
+            db.func.date(Termin.zeitpunkt) == heute
+        ).order_by(Termin.zeitpunkt.asc()).all()
+
         medikamente = Medikament.query.filter_by(patient_id=patient.id).all()
         
         einnahmen_heute = EinnahmeProtokoll.query.filter(
@@ -59,6 +65,7 @@ def tagesansicht():
         gruppierte_medikamente=gruppierte_medikamente, 
         gesamt_anzahl=gesamt_anzahl,
         erledigt_anzahl=erledigt_anzahl,
+        termine_heute=termine_heute,
         heute=heute
     )
 
@@ -92,4 +99,15 @@ def einnehmen(medikament_id):
             db.session.rollback()
             flash("Fehler bei der Einnahmeverbuchung.", "danger")
 
+    return redirect(url_for('patient.tagesansicht'))
+
+
+@patient_bp.route('/termin-erledigen/<int:termin_id>', methods=['POST'])
+def termin_erledigen(termin_id):
+    """Ermöglicht der zu pflegenden Person das Abhaken von Tagesterminen."""
+    termin = Termin.query.get_or_404(termin_id)
+    
+    termin.erledigt = not termin.erledigt
+    db.session.commit()
+    
     return redirect(url_for('patient.tagesansicht'))
