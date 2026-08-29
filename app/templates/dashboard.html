@@ -7,9 +7,9 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
         <div>
-            <h1 class="h3 fw-bold mb-1">Angehörigen-Dashboard</h1>
+            <h1 class="h3 fw-bold mb-0">Angehörigen-Dashboard</h1>
             {% if patient %}
-                <p class="text-muted mb-0">Betreuter Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geburtsdatum: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
+                <p class="text-muted mb-0">Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geb.: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
             {% endif %}
         </div>
         <div class="d-flex gap-2">
@@ -18,9 +18,6 @@
             </a>
             <a href="{{ url_for('medikamente.neu') }}" class="btn btn-primary fw-semibold shadow-sm">
                 <i class="bi bi-plus-lg me-1"></i> + Neues Medikament
-            </a>
-            <a href="#" class="btn btn-success fw-semibold shadow-sm">
-                <i class="bi bi-file-earmark-pdf me-1"></i> PDF-Arztbericht
             </a>
         </div>
     </div>
@@ -67,9 +64,6 @@
                     <h5 class="card-title fw-bold mb-0 text-primary">
                         <i class="bi bi-capsule me-2"></i>Aktueller Medikationsplan
                     </h5>
-                    <a href="{{ url_for('medikamente.index') }}" class="btn btn-sm btn-outline-primary">
-                        Alle verwalten <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
                 </div>
                 <div class="card-body p-0">
                     {% if medikamente %}

@@ -8,7 +8,7 @@
         <div>
             <h1 class="h3 fw-bold mb-0">Pflegetermine & Aufgaben</h1>
             {% if patient %}
-                <p class="text-muted mb-0">Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong></p>
+                <p class="text-muted mb-0">Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geb.: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
             {% endif %}
         </div>
         <a href="{{ url_for('termine.neu') }}" class="btn btn-primary fw-semibold shadow-sm">

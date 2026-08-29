@@ -7,6 +7,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
         <div>
             <h1 class="h3 fw-bold mb-0">Vitaldaten-Historie</h1>
+            {% if patient %}
+                <p class="text-muted mb-0">Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geb.: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
+            {% endif %}
         </div>
         <div class="d-flex gap-2">
             <a href="{{ url_for('vitaldaten.neu') }}" class="btn btn-primary fw-semibold shadow-sm">

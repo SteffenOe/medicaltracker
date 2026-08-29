@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import  StringField, SelectField, SubmitField
+from wtforms.fields import  StringField, SelectField, SubmitField, DateTimeLocalField
 from wtforms.validators import DataRequired, Length
-from wtforms.fields import DateTimeLocalField
 
 class TerminForm(FlaskForm):
     """Formular zur Erfassung und Bearbeitung von Pflegeterminen (FA-04)."""

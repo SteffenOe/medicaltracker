@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SelectField, SubmitField
+from wtforms.fields import StringField, IntegerField, SelectField, SubmitField
 from wtforms.validators import DataRequired, NumberRange, Length
 
 class MedikamentForm(FlaskForm):

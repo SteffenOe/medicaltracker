@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import  FloatField, SelectField, SubmitField
+from wtforms.fields import  FloatField, SelectField, SubmitField
 from wtforms.validators import DataRequired, NumberRange,  Optional
 
 class VitalwertForm(FlaskForm):
