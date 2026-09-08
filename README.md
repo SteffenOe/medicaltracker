@@ -71,15 +71,13 @@ git clone [https://github.com/SteffenOe/medicaltracker.git](https://github.com/S
 cd medicaltracker
 
 2. Virtuelle Umgebung erstellen und aktivieren
-PowerShell
 
+PowerShell
 python -m venv .venv
-# Windows PowerShell:
-.\.venv\Scripts\Activate.ps1
-# Linux/macOS:
-source .venv/bin/activate
+
 
 3. Abhängigkeiten installieren
+
 PowerShell
 
 pip install --upgrade pip
@@ -88,11 +86,13 @@ pip install -r requirements.txt
 4. Testdaten einspielen (Empfohlen für Prüfungszwecke)
 
 Zur sofortigen Begutachtung aller Funktionalitäten (inklusive 14-tägiger Vitalwert-Historie für den PDF-Export und Bestandswarnungen) wird die Datenbank initial befüllt:
+
 PowerShell
 
 python seed.py
 
 5. Anwendung starten
+
 PowerShell
 
 python run.py
