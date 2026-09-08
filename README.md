@@ -48,3 +48,61 @@ Die Anwendung folgt einer hierarchischen **Drei-Schichten-Architektur** unter ko
 * **Persistenzschicht (Model):** Lokale relationale SQLite-Datenbank (`medical_tracker.db`), angebunden über das ORM Flask-SQLAlchemy mit kaskadierenden Fremdschlüsseln und Check-Constraints.
 * **Formular- und Eingabesicherheit:** Flask-WTF / WTForms zur Durchsetzung kryptographischer CSRF-Token und mehrstufiger serverseitiger Geschäftsregel-Validierungen.
 * **Systemzuverlässigkeit:** Automatisiertes Anlegen lokaler Dateibackups (`/database/backups/`) sowie Prüfung der SQLite-Header-Integrität bei jedem Systemstart (`run.py`).
+
+---
+
+## 4. Systemvoraussetzungen
+
+    Betriebssystem: Microsoft Windows 10/11 (oder macOS / Linux)
+
+    Laufzeitumgebung: Python 3.13 oder höher
+
+    Webbrowser: Google Chrome, Mozilla Firefox oder Microsoft Edge in aktueller Version
+
+---
+
+## 6. Installation & Schnellstart
+
+Führen Sie die folgenden Schritte in einem Terminal (z. B. PowerShell unter Windows) aus:
+1. Repository klonen
+PowerShell
+
+git clone [https://github.com/SteffenOe/medicaltracker.git](https://github.com/SteffenOe/medicaltracker.git)
+cd medicaltracker
+
+2. Virtuelle Umgebung erstellen und aktivieren
+PowerShell
+
+python -m venv .venv
+# Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+# Linux/macOS:
+source .venv/bin/activate
+
+3. Abhängigkeiten installieren
+PowerShell
+
+pip install --upgrade pip
+pip install -r requirements.txt
+
+4. Testdaten einspielen (Empfohlen für Prüfungszwecke)
+
+Zur sofortigen Begutachtung aller Funktionalitäten (inklusive 14-tägiger Vitalwert-Historie für den PDF-Export und Bestandswarnungen) wird die Datenbank initial befüllt:
+PowerShell
+
+python seed.py
+
+5. Anwendung starten
+PowerShell
+
+python run.py
+
+Die Anwendung startet unter der lokalen Adresse:
+
+http://127.0.0.1:5000/
+
+7. Datenschutz und rechtliche Abgrenzung
+
+    Datenschutz (DSGVO): Alle Gesundheitsdaten werden ausschließlich lokal in der SQLite-Datenbank auf dem Hostrechner verarbeitet (Privacy by Design nach Art. 25 DSGVO). Die Verarbeitung fällt unter die Haushaltsausnahme (Art. 2 Abs. 2 lit. c DSGVO). Es erfolgt keinerlei Datentransfer an externe Server oder Cloud-Dienste.
+
+    Medizinprodukte-Disclaimer: Der Medical Tracker dient als privates Organisations- und Dokumentationswerkzeug. Das System ist kein zertifiziertes Medizinprodukt nach EU-MDR 2017/745. Es führt keine automatisierten Diagnosen, Dosisberechnungen oder Therapieentscheidungen durch. Die Verantwortung verbleibt stets bei der behandelnden Ärzteschaft und den Anwendenden.
