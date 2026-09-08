@@ -1,8 +1,9 @@
+"""Controller für das zentrale Angehörigen-Dashboard (Verwaltungsmodus)."""
+
 from datetime import date
 import locale
 from flask import Blueprint, render_template, redirect, url_for, flash
-from app import db
-from app.models import Patient, Medikament, Vitalwert, Termin, EinnahmeProtokoll
+from app.models import db, Patient, Medikament, Vitalwert, Termin, EinnahmeProtokoll
 from app.utils import ist_einnahme_ueberfaellig
 
 
@@ -28,8 +29,9 @@ def dashboard():
     ueberfaellige_einnahmen = []
     
     if patient:
+        # Auswertung kritischer Bestände gemäß Schwellenwert-Logik
         medikamente = Medikament.query.filter_by(patient_id=patient.id).all()
-        kritische_medikamente = [m for m in medikamente if m.bestand <= m.mindestbestand]
+        kritische_medikamente = [m for m in medikamente if m.ist_nachbestellung_erforderlich]
         
         einnahmen_heute = EinnahmeProtokoll.query.filter(
             EinnahmeProtokoll.patient_id == patient.id,
@@ -40,7 +42,8 @@ def dashboard():
         for m in medikamente:
             if ist_einnahme_ueberfaellig(m.tageszeit, m.id in eingenommene_ids):
                 ueberfaellige_einnahmen.append(m)
-        
+
+        # Chronologische Selektion anstehender Pflegetermine und neuester Messwerte
         vitalwerte = Vitalwert.query.filter_by(patient_id=patient.id).order_by(Vitalwert.zeitpunkt.desc()).limit(5).all()
         termine = Termin.query.filter_by(patient_id=patient.id, erledigt=False).order_by(Termin.zeitpunkt.asc()).limit(5).all()
 

@@ -8,12 +8,12 @@ class MedikamentForm(FlaskForm):
         DataRequired(message="Bitte geben Sie den Namen des Medikaments an."),
         Length(max=150, message="Der Name darf maximal 150 Zeichen lang sein.")
     ])
-    
+  
     dosierung = StringField('Dosierung (z. B. 1 Tablette, 10 Tropfen)', validators=[
         DataRequired(message="Bitte geben Sie die verordnete Dosierung an."),
         Length(max=50)
     ])
-    
+   
     tageszeit = SelectField('Einnahmezeitpunkt', choices=[
         ('Morgens', 'Morgens'),
         ('Mittags', 'Mittags'),
@@ -21,15 +21,16 @@ class MedikamentForm(FlaskForm):
         ('Nachts', 'Nachts'),
         ('Bei Bedarf', 'Bei Bedarf')
     ], validators=[DataRequired()])
-    
+
+    # Geschäftsregel GR-01: Bestände dürfen niemals negativ sein
     bestand = IntegerField('Aktueller Bestand (Packungsinhalt)', validators=[
         DataRequired(message="Bitte erfassen Sie den Anfangsbestand."),
         NumberRange(min=0, message="Der Bestand darf nicht negativ sein.")
     ], default=20)
-    
+ 
     mindestbestand = IntegerField('Mindestbestand (Warnschwelle)', validators=[
         DataRequired(message="Bitte definieren Sie einen Mindestbestand."),
         NumberRange(min=0, message="Der Mindestbestand darf nicht negativ sein.")
     ], default=5)
-    
+  
     submit = SubmitField('Medikament speichern')

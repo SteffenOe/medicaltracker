@@ -1,6 +1,7 @@
-from app import db
+from app.models import db
 
 class Patient(db.Model):
+    """Repräsentiert die zu pflegende Person."""
     __tablename__ = 'patienten'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -13,3 +14,11 @@ class Patient(db.Model):
     einnahmen = db.relationship('EinnahmeProtokoll', backref='patient', lazy=True, cascade="all, delete-orphan")
     vitalwerte = db.relationship('Vitalwert', backref='patient', lazy=True, cascade="all, delete-orphan")
     termine = db.relationship('Termin', backref='patient', lazy=True, cascade="all, delete-orphan")
+
+    @property
+    def vollstaendiger_name(self) -> str:
+        """Gibt den vollständigen Namen aus."""
+        return f"{self.vorname} {self.nachname}"
+
+    def __repr__(self) -> str:
+        return f"<Patient {self.id}: {self.vollstaendiger_name}>"

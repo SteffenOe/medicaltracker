@@ -1,3 +1,5 @@
+"""Zentrale Bereitstellung aller WTForms-Formularklassen."""
+
 from app.forms.medikament import MedikamentForm
 from app.forms.vitalwert import VitalwertForm
 from app.forms.termin import TerminForm

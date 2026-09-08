@@ -1,6 +1,7 @@
+"""Controller für die Verwaltung des Medikationsplans."""
+
 from flask import Blueprint, render_template, redirect, url_for, flash
-from app import db
-from app.models import Patient, Medikament
+from app.models import db, Patient, Medikament
 from app.forms import MedikamentForm
 
 medikamente_bp = Blueprint('medikamente', __name__, url_prefix='/medikamente')

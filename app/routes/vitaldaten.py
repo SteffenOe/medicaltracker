@@ -1,7 +1,8 @@
+"""Controller für die Vitalwerterfassung und Verlaufshistorie."""
+
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash
-from app import db
-from app.models import Patient, Vitalwert
+from app.models import db, Patient, Vitalwert
 from app.forms import VitalwertForm
 
 vitaldaten_bp = Blueprint('vitaldaten', __name__, url_prefix='/vitaldaten')
@@ -32,6 +33,7 @@ def neu():
         jetzt = datetime.now()
 
         try:
+            # Blutdruck: Speicherung als getrennte, relationale Datensätze für systolisch & diastolisch
             if kat == 'Blutdruck':
                 v_sys = Vitalwert(
                     patient_id=patient.id,

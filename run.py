@@ -1,8 +1,11 @@
+"""Haupteinstiegspunkt zum Starten des lokalen Entwicklungsservers"""
+
 import os
 import shutil
 import sqlite3
 from datetime import datetime
-from app import create_app, db
+from app import create_app
+from app.models import db
 from config import BASE_DIR, Config
 
 app = create_app()
@@ -39,9 +42,11 @@ def pruefe_und_sichere_datenbank():
 if __name__ == '__main__':
     os.makedirs(os.path.join(BASE_DIR, 'database'), exist_ok=True)
     pruefe_und_sichere_datenbank()
-    
+
+    # Automatische Tabellenerstellung im lokalen Entwicklungsbetrieb
     with app.app_context():
         db.create_all()
         print("Datenbanktabellen in 'database/medical_tracker.db' erfolgreich erzeugt.")
-        
+
+    # Lokaler Entwicklungsmodus mit Debugger und automatischem Reload    
     app.run(debug=True, port=5000)

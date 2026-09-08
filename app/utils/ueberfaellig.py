@@ -1,5 +1,6 @@
 from datetime import datetime
 
+# Zeitliche Schwellen zur Bewertung von Überfälligkeiten
 ZEITFENSTER_ENDE = {
     'Morgens': 11,      # Ab 11:00 Uhr überfällig
     'Mittags': 15,      # Ab 15:00 Uhr überfällig
@@ -16,6 +17,7 @@ def ist_einnahme_ueberfaellig(tageszeit: str, eingenommen: bool) -> bool:
     aktuelle_stunde = datetime.now().hour
     grenz_stunde = ZEITFENSTER_ENDE[tageszeit]
 
+    # Sonderfall Nacht: Zeitfenster überschreitet die Datumsgrenze (Mitternacht)
     if tageszeit == 'Nachts':
         return 5 <= aktuelle_stunde < 22
 

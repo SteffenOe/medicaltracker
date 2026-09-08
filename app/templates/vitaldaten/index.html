@@ -8,7 +8,7 @@
         <div>
             <h1 class="h3 fw-bold mb-0">Vitaldaten-Historie</h1>
             {% if patient %}
-                <p class="text-muted mb-0">Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geb.: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
+                <p class="text-muted mb-0">Patient: <strong>{{ patient.vollstaendiger_name }}</strong> (Geb.: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
             {% endif %}
         </div>
         <div class="d-flex gap-2">

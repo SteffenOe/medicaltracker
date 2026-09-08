@@ -1,7 +1,8 @@
+"""Controller für die barrierefreie Patientensicht und den Einnahme-Kernprozess (GP-03)."""
+
 from datetime import date, datetime
 from flask import Blueprint, render_template, redirect, url_for, flash
-from app import db
-from app.models import Patient, Medikament, EinnahmeProtokoll, Termin
+from app.models import db, Patient, Medikament, EinnahmeProtokoll, Termin
 from app.utils import ist_einnahme_ueberfaellig
 from app.forms import PatientForm
 
@@ -27,7 +28,8 @@ def tagesansicht():
         ).order_by(Termin.zeitpunkt.asc()).all()
 
         medikamente = Medikament.query.filter_by(patient_id=patient.id).all()
-        
+
+        # Einnahme-IDs des heutigen Kalendertages ermitteln
         einnahmen_heute = EinnahmeProtokoll.query.filter(
             EinnahmeProtokoll.patient_id == patient.id,
             db.func.date(EinnahmeProtokoll.einnahme_zeitpunkt) == heute
@@ -36,7 +38,8 @@ def tagesansicht():
         
         for tz in TAGESZEITEN_ORDNUNG:
             gruppierte_medikamente[tz] = []
-            
+
+        # Statusaggregation für jedes Medikament im Tagesverlauf
         for med in medikamente:
             protokoll = einnahmen_dict.get(med.id)
             ist_erledigt = protokoll is not None
@@ -76,6 +79,7 @@ def einnehmen(medikament_id):
     medikament = Medikament.query.get_or_404(medikament_id)
     heute = date.today()
 
+    # Duplikatsprüfung: Verhindert Mehrfachquittierung innerhalb desselben Tages
     bereits_eingenommen = EinnahmeProtokoll.query.filter(
         EinnahmeProtokoll.medikament_id == medikament.id,
         db.func.date(EinnahmeProtokoll.einnahme_zeitpunkt) == heute
@@ -83,6 +87,7 @@ def einnehmen(medikament_id):
 
     if not bereits_eingenommen:
         try:
+            # Atomare Transaktion: 1. Protokollieren, 2. Bestand dekrementieren
             neues_protokoll = EinnahmeProtokoll(
                 patient_id=medikament.patient_id,
                 medikament_id=medikament.id,

@@ -1,105 +1,150 @@
-{% extends 'base.html' %}
-
-{% block title %}Medikationsübersicht - Medical Tracker{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Medikationsübersicht - Medical
+Tracker{% endblock %} {% block content %}
 <div class="container-fluid p-0">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div>
-            <h1 class="h3 fw-bold mb-0">Medikationsübersicht</h1>
-            {% if patient %}
-                <p class="text-muted mb-0">Patient: <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geb.: {{ patient.geburtsdatum.strftime('%d.%m.%Y') }})</p>
-            {% endif %}
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ url_for('medikamente.neu') }}" class="btn btn-primary fw-semibold shadow-sm">
-                <i class="bi bi-plus-lg me-1"></i> + Neues Medikament
-            </a>
-        </div>
+  <div
+    class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom"
+  >
+    <div>
+      <h1 class="h3 fw-bold mb-0">Medikationsübersicht</h1>
+      {% if patient %}
+      <p class="text-muted mb-0">
+        Patient: <strong>{{ patient.vollstaendiger_name }}</strong> (Geb.: {{
+        patient.geburtsdatum.strftime('%d.%m.%Y') }})
+      </p>
+      {% endif %}
     </div>
-
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-body p-0">
-            {% if medikamente %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Name</th>
-                                <th>Dosierung</th>
-                                <th>Einnahmezeit</th>
-                                <th>Bestand</th>
-                                <th class="text-end pe-4">Aktionen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for med in medikamente %}
-                            <tr>
-                                <td class="ps-4 fw-bold text-dark">{{ med.name }}</td>
-                                <td>{{ med.dosierung }}</td>
-                                <td><span class="badge bg-secondary">{{ med.tageszeit }}</span></td>
-                                <td>
-                                    {% if med.bestand <= med.mindestbestand %}
-                                        <span class="badge bg-danger px-2 py-1 fs-6">
-                                            {{ med.bestand }} Stk. (WARNUNG: Niedrig)
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-success px-2 py-1 fs-6">
-                                            {{ med.bestand }} Stk. (OK)
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="{{ url_for('medikamente.bearbeiten', id=med.id) }}" 
-                                       class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="bi bi-pencil-square"></i> Bearbeiten
-                                    </a>
-
-                                    <button type="button" 
-                                            class="btn btn-sm btn-outline-danger" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#deleteModal{{ med.id }}">
-                                        <i class="bi bi-trash"></i> Löschen
-                                    </button>
-
-                                    <div class="modal fade text-start" id="deleteModal{{ med.id }}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title fw-bold text-danger">
-                                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Medikament löschen
-                                                    </h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Möchten Sie das Medikament <strong>{{ med.name }}</strong> ({{ med.dosierung }}) wirklich unwiderruflich aus dem Medikationsplan entfernen?
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Abbrechen</button>
-                                                    <form method="POST" action="{{ url_for('medikamente.loeschen', id=med.id) }}" style="display:inline;">
-                                                        <button type="submit" class="btn btn-danger fw-semibold">Ja, löschen</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="p-5 text-muted text-center">
-                    <i class="bi bi-capsule display-4 d-block mb-3 text-secondary"></i>
-                    <h5>Keine Medikamente erfasst</h5>
-                    <p class="small text-muted mb-3">Legen Sie das erste Medikament für den Patienten an.</p>
-                    <a href="{{ url_for('medikamente.neu') }}" class="btn btn-primary btn-sm fw-semibold">
-                        + Erstes Medikament anlegen
-                    </a>
-                </div>
-            {% endif %}
-        </div>
+    <div class="d-flex gap-2">
+      <a
+        href="{{ url_for('medikamente.neu') }}"
+        class="btn btn-primary fw-semibold shadow-sm"
+      >
+        <i class="bi bi-plus-lg me-1"></i> + Neues Medikament
+      </a>
     </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+      {% if medikamente %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Name</th>
+              <th>Dosierung</th>
+              <th>Einnahmezeit</th>
+              <th>Bestand</th>
+              <th class="text-end pe-4">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for med in medikamente %}
+            <tr>
+              <td class="ps-4 fw-bold text-dark">{{ med.name }}</td>
+              <td>{{ med.dosierung }}</td>
+              <td>
+                <span class="badge bg-secondary">{{ med.tageszeit }}</span>
+              </td>
+              <td>
+                {% if med.ist_nachbestellung_erforderlich %}
+                <span class="badge bg-danger px-2 py-1 fs-6">
+                  {{ med.bestand }} Stk. (WARNUNG: Niedrig)
+                </span>
+                {% else %}
+                <span class="badge bg-success px-2 py-1 fs-6">
+                  {{ med.bestand }} Stk. (OK)
+                </span>
+                {% endif %}
+              </td>
+              <td class="text-end pe-4">
+                <a
+                  href="{{ url_for('medikamente.bearbeiten', id=med.id) }}"
+                  class="btn btn-sm btn-outline-primary me-1"
+                >
+                  <i class="bi bi-pencil-square"></i> Bearbeiten
+                </a>
+
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteModal{{ med.id }}"
+                >
+                  <i class="bi bi-trash"></i> Löschen
+                </button>
+
+                <div
+                  class="modal fade text-start"
+                  id="deleteModal{{ med.id }}"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-danger">
+                          <i class="bi bi-exclamation-triangle-fill me-2"></i
+                          >Medikament löschen
+                        </h5>
+                        <button
+                          type="button"
+                          class="btn-close"
+                          data-bs-dismiss="modal"
+                          aria-label="Schließen"
+                        ></button>
+                      </div>
+                      <div class="modal-body">
+                        Möchten Sie das Medikament
+                        <strong>{{ med.name }}</strong> ({{ med.dosierung }})
+                        wirklich unwiderruflich aus dem Medikationsplan
+                        entfernen?
+                      </div>
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          class="btn btn-light border"
+                          data-bs-dismiss="modal"
+                        >
+                          Abbrechen
+                        </button>
+                        <form
+                          method="POST"
+                          action="{{ url_for('medikamente.loeschen', id=med.id) }}"
+                          style="display: inline"
+                        >
+                          <button
+                            type="submit"
+                            class="btn btn-danger fw-semibold"
+                          >
+                            Ja, löschen
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="p-5 text-muted text-center">
+        <i class="bi bi-capsule display-4 d-block mb-3 text-secondary"></i>
+        <h5>Keine Medikamente erfasst</h5>
+        <p class="small text-muted mb-3">
+          Legen Sie das erste Medikament für den Patienten an.
+        </p>
+        <a
+          href="{{ url_for('medikamente.neu') }}"
+          class="btn btn-primary btn-sm fw-semibold"
+        >
+          + Erstes Medikament anlegen
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

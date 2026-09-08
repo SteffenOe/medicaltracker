@@ -31,6 +31,7 @@ class VitalwertForm(FlaskForm):
 
         kat = self.kategorie.data
 
+        # GR-02: Blutdruck-Plausibilität (30 <= Diastolisch < Systolisch <= 300 mmHg)
         if kat == 'Blutdruck':
             if self.systolisch.data is None or self.diastolisch.data is None:
                 self.systolisch.errors.append("Für die Blutdruckmessung müssen Systole und Diastole angegeben werden.")
@@ -39,6 +40,7 @@ class VitalwertForm(FlaskForm):
                 self.systolisch.errors.append("Plausibilitätsfehler: Der systolische Wert muss größer als der diastolische Wert sein.")
                 return False
 
+        # GR-02: Pulsfrequenz (30 bis 250 bpm)
         elif kat == 'Puls':
             if self.einzelwert.data is None:
                 self.einzelwert.errors.append("Bitte geben Sie die Pulsfrequenz an.")
@@ -47,6 +49,7 @@ class VitalwertForm(FlaskForm):
                 self.einzelwert.errors.append("Pulsfrequenz muss zwischen 30 und 250 bpm liegen.")
                 return False
 
+        # GR-02: Körpergewicht (2,0 bis 300,0 kg)
         elif kat == 'Gewicht':
             if self.einzelwert.data is None:
                 self.einzelwert.errors.append("Bitte erfassen Sie das Körpergewicht.")

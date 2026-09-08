@@ -1,6 +1,7 @@
+"""Controller für den Alltags- und Pflegeterminkalender."""
+
 from flask import Blueprint, render_template, redirect, url_for, flash
-from app import db
-from app.models import Patient, Termin
+from app.models import db, Patient, Termin
 from app.forms import TerminForm
 
 termine_bp = Blueprint('termine', __name__, url_prefix='/termine')

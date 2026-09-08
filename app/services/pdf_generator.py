@@ -4,12 +4,13 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
 )
 from reportlab.pdfgen import canvas
 
 class NumberedCanvas(canvas.Canvas):
     """Zweistufiger Canvas-Renderer für konsistente Seitenzahlen und Footer."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
@@ -34,7 +35,7 @@ class NumberedCanvas(canvas.Canvas):
         self.setStrokeColor(colors.HexColor("#bdc3c7"))
         self.setLineWidth(0.5)
         self.line(40, 45, 555, 45)
-        
+
         hinweis = "Medical Tracker • Privates Pflegedokumentationssystem (Kein zertifiziertes Medizinprodukt)"
         self.drawString(40, 32, hinweis)
         self.drawRightString(555, 32, f"Seite {self._pageNumber} von {page_count}")
@@ -114,7 +115,7 @@ def erstelle_arztbericht_pdf(patient, medikamente, vitalwerte, einnahmen, start_
 
     stammdaten = [
         [
-            Paragraph(f"<b>Patient:</b> {patient.nachname}, {patient.vorname}", style_cell),
+            Paragraph(f"<b>Patient:</b> {patient.vollstaendiger_name}", style_cell),
             Paragraph(f"<b>Geburtsdatum:</b> {patient.geburtsdatum.strftime('%d.%m.%Y')}", style_cell),
             Paragraph(f"<b>Notfallkontakt:</b> {patient.notfallkontakt or 'Nicht hinterlegt'}", style_cell)
         ]

@@ -1,3 +1,5 @@
+"""Zentrale Registrierung und Initialisierung aller Flask-Blueprints."""
+
 from app.routes.main import main_bp
 from app.routes.medikamente import medikamente_bp
 from app.routes.patient import patient_bp

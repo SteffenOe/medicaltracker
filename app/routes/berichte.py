@@ -1,3 +1,5 @@
+"""Controller für den In-Memory-Export des ärztlichen Verlaufsberichts."""
+
 from datetime import date, timedelta, datetime
 from flask import Blueprint, render_template, send_file, flash, redirect, url_for
 from app.models import Patient, Medikament, Vitalwert, EinnahmeProtokoll
@@ -26,8 +28,8 @@ def index():
         start_dt = datetime.combine(start_d, datetime.min.time())
         end_dt = datetime.combine(end_d, datetime.max.time())
 
-        medikamente = Medikament.query.filter_by(patient_id=patient.id).all()
-        
+        # Relevante Verlaufsdaten für das gewählte Zeitfenster selektieren
+        medikamente = Medikament.query.filter_by(patient_id=patient.id).all()        
         vitalwerte = Vitalwert.query.filter(
             Vitalwert.patient_id == patient.id,
             Vitalwert.zeitpunkt >= start_dt,
@@ -40,6 +42,7 @@ def index():
             EinnahmeProtokoll.einnahme_zeitpunkt <= end_dt
         ).order_by(EinnahmeProtokoll.einnahme_zeitpunkt.asc()).all()
 
+        # In-Memory-Kompilierung verhindert unverschlüsselte Dateireste im Dateisystem
         pdf_buffer = erstelle_arztbericht_pdf(
             patient=patient,
             medikamente=medikamente,

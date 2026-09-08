@@ -9,7 +9,7 @@ endblock %} {% block content %}
       {% if patient %}
       <p class="text-muted mb-0">
         Patient:
-        <strong>{{ patient.vorname }} {{ patient.nachname }}</strong> (Geb.: {{
+        <strong>{{ patient.vollstaendiger_name }}</strong> (Geb.: {{
         patient.geburtsdatum.strftime('%d.%m.%Y') }})
       </p>
       {% endif %}
@@ -108,7 +108,7 @@ endblock %} {% block content %}
                     <span class="badge bg-secondary">{{ med.tageszeit }}</span>
                   </td>
                   <td>
-                    {% if med.bestand <= med.mindestbestand %}
+                    {% if med.ist_nachbestellung_erforderlich %}
                     <span class="badge bg-danger px-2 py-1"
                       >{{ med.bestand }} Stk. (Niedrig)</span
                     >

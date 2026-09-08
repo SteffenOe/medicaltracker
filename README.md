@@ -42,7 +42,7 @@ Der **Medical Tracker** löst dieses Problem durch ein leichtgewichtiges, lokal 
 
 Die Anwendung folgt einer hierarchischen **Drei-Schichten-Architektur** unter konsequenter Umsetzung des **Model-View-Controller-Musters (MVC)**:
 
-* **Backend / Controller:** Python (v3.13+) mit dem Micro-Framework Flask. Strukturierung über modulare Flask-Blueprints (`main`, `medikamente`, `patient`, `vitaldaten`, `termine`, `reports`).
+* **Backend / Controller:** Python (v3.14+) mit dem Micro-Framework Flask. Strukturierung über modulare Flask-Blueprints (`main`, `medikamente`, `patient`, `vitaldaten`, `termine`, `reports`).
 * **Präsentationsschicht (View):** Serverseitig gerenderte Jinja2-HTML5-Templates mit Bootstrap 5. Separation of Concerns durch Auslagerung aller Stile und Verhaltensskripte nach `app/static/css/` und `app/static/js/`.
 * **Service-Layer:** Entkoppelte Generierung von PDF-Dokumenten (`app/services/pdf_generator.py`) mittels ReportLab und zweistufiger Paginierung (`NumberedCanvas`).
 * **Persistenzschicht (Model):** Lokale relationale SQLite-Datenbank (`medical_tracker.db`), angebunden über das ORM Flask-SQLAlchemy mit kaskadierenden Fremdschlüsseln und Check-Constraints.
@@ -55,7 +55,7 @@ Die Anwendung folgt einer hierarchischen **Drei-Schichten-Architektur** unter ko
 
     Betriebssystem: Microsoft Windows 10/11 (oder macOS / Linux)
 
-    Laufzeitumgebung: Python 3.13 oder höher
+    Laufzeitumgebung: Python 3.14 oder höher
 
     Webbrowser: Google Chrome, Mozilla Firefox oder Microsoft Edge in aktueller Version
 
