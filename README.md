@@ -73,6 +73,7 @@ cd medicaltracker
 2. Virtuelle Umgebung erstellen und aktivieren
 
 PowerShell
+
 python -m venv .venv
 
 
