@@ -1,3 +1,6 @@
+#Env
+.env
+
 # Virtuelle Umgebung
 venv/
 
