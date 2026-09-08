@@ -7,7 +7,7 @@ class Medikament(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patienten.id'), nullable=False)
     name = db.Column(db.String(150), nullable=False)
     dosierung = db.Column(db.String(50), nullable=False)
-    tageszeit = db.Column(db.String(50), nullable=False)  # z. B. Morgens, Mittags, Abends
+    tageszeit = db.Column(db.String(50), nullable=False)
     bestand = db.Column(db.Integer, nullable=False, default=0)
     mindestbestand = db.Column(db.Integer, nullable=False, default=5)
 

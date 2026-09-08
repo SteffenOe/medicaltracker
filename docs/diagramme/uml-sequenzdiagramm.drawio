@@ -1,0 +1,676 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Seite-1" id="d7qlxT02VkfvYRmv3MnV">
+    <mxGraphModel dx="2020" dy="1063" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <UserObject label="" plantUmlData="{&#xa;  &quot;data&quot;: &quot;@startuml\nautonumber\nskinparam shadowing false\nskinparam roundcorner 6\nskinparam ParticipantPadding 15\nskinparam BoxPadding 10\n\nactor \&quot;Zu pflegende Person\\n(oder Angehörige:r)\&quot; as User\nboundary \&quot;Webbrowser\\n(Patientensicht)\&quot; as Browser\ncontrol \&quot;PatientController\\n(patient_bp)\&quot; as Controller\nentity \&quot;TimeUtils\\n(app/utils)\&quot; as Utils\ndatabase \&quot;SQLAlchemy\\nSession\&quot; as DB\ndatabase \&quot;SQLite DB\\n(medical_tracker.db)\&quot; as SQLite\n\n== 1. Initiale Tagesansicht laden ==\n\nUser -&gt; Browser: Klickt auf \&quot;Patientenansicht\&quot;\nBrowser -&gt; Controller: GET /patient/\nactivate Controller\n\nController -&gt; DB: Patient.query.first()\nDB -&gt; SQLite: SELECT * FROM patient LIMIT 1;\nSQLite --&gt; DB: patient_obj\n\nController -&gt; DB: EinnahmeProtokoll.query.filter(date == heute)\nDB -&gt; SQLite: SELECT * FROM einnahme_protokolle WHERE date(zeitpunkt) = ?\nSQLite --&gt; DB: [einnahmen_liste]\n\nController -&gt; DB: Medikament.query.filter_by(patient_id)\nDB -&gt; SQLite: SELECT * FROM medikamente WHERE patient_id = ?\nSQLite --&gt; DB: [medikamente_liste]\n\nloop Für jedes Medikament in medikamente_liste\n    Controller -&gt; Utils: ist_einnahme_ueberfaellig(tageszeit, eingenommen)\n    Utils --&gt; Controller: boolean (ueberfaellig)\nend\n\nController --&gt; Browser: 200 OK (Render &#39;patient/tagesansicht.html&#39;)\ndeactivate Controller\nBrowser --&gt; User: Anzeige barrierefreie Tagesansicht\\n(Kacheln, Uhrzeit, offene Dosen)\n\n== 2. Einnahme bestätigen (Kernprozess GP-03) ==\n\nUser -&gt; Browser: Klickt auf \&quot;Als eingenommen markieren\&quot;\\n(z.B. Ramipril 5mg, ID: 1)\nBrowser -&gt; Controller: POST /patient/einnehmen/1\\n[Header: CSRF-Token]\nactivate Controller\n\nController -&gt; DB: EinnahmeProtokoll.query.filter(med_id=1, date=heute).first()\nDB -&gt; SQLite: SELECT id FROM einnahme_protokolle WHERE medikament_id=1 AND ...\nSQLite --&gt; DB: None (noch nicht eingenommen)\n\nalt Einnahme noch nicht protokolliert (Erfolgsfall)\n    note over Controller, DB #EAFAF1\n        Transaktionsstart (Atomarer Verbund nach GP-03 / FA-06 / FA-07)\n    end note\n    \n    Controller -&gt; Controller: Instanziiere EinnahmeProtokoll(\\npatient_id, medikament_id=1, zeitpunkt=NOW)\n    Controller -&gt; DB: db.session.add(neues_protokoll)\n    \n    Controller -&gt; DB: Medikament.query.get(1)\n    DB --&gt; Controller: medikament_obj\n    \n    alt medikament_obj.bestand &gt; 0\n        Controller -&gt; Controller: medikament_obj.bestand -= 1\n    end\n    \n    Controller -&gt; DB: db.session.commit()\n    activate DB\n    DB -&gt; SQLite: BEGIN TRANSACTION;\\nINSERT INTO einnahme_protokolle ...;\\nUPDATE medikamente SET bestand = bestand - 1 ...;\\nCOMMIT;\n    SQLite --&gt; DB: SUCCESS\n    deactivate DB\n\nelse Datenbankfehler / Transaktionsabbruch (Rollback)\n    Controller -&gt; DB: db.session.rollback()\n    DB -&gt; SQLite: ROLLBACK;\n    Controller -&gt; Controller: flash(\&quot;Fehler bei der Verbuchung\&quot;, \&quot;danger\&quot;)\nend\n\n== 3. Post-Redirect-Get (PRG) &amp; UI-Aktualisierung ==\n\nController --&gt; Browser: 302 Found (Redirect to /patient/)\ndeactivate Controller\n\nBrowser -&gt; Controller: GET /patient/\nactivate Controller\nController -&gt; DB: Aktualisierte Einnahmen &amp; Bestände abfragen\nDB --&gt; Controller: Aktueller Zustand\nController --&gt; Browser: 200 OK (HTML mit deaktivierter/grüner Bestätigungskachel)\ndeactivate Controller\n\nBrowser --&gt; User: Visuelle Rückmeldung:\\n\&quot;Bereits eingenommen um HH:MM Uhr\&quot;\n@enduml&quot;,&#xa;  &quot;config&quot;: null&#xa;}" id="TadifsUSA652-nzq5Avc-1">
+          <mxCell connectable="0" parent="1" style="group;transparentBounds=1;editIcon=1;lockedGroup=0;groupPadding=10;" vertex="1">
+            <mxGeometry as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="pl_4" plantUmlBaseStyle="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=76;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-2">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=76;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="1827.8" width="139.33700000000002" x="35" y="30" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Zu pflegende Person&#xa;(oder Angehörige:r)" plantUmlId="p_77" plantUmlBaseStyle="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="Zu pflegende Person&#xa;(oder Angehörige:r)" id="TadifsUSA652-nzq5Avc-3">
+          <mxCell parent="TadifsUSA652-nzq5Avc-2" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="38" width="24" x="57.66850000000001" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Zu pflegende Person&#xa;(oder Angehörige:r)" plantUmlId="pf_78" plantUmlBaseStyle="shape=umlActor;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="Zu pflegende Person&#xa;(oder Angehörige:r)" id="TadifsUSA652-nzq5Avc-4">
+          <mxCell parent="TadifsUSA652-nzq5Avc-2" style="shape=umlActor;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="38" width="24" x="57.66850000000001" y="1789.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="pl_5" plantUmlBaseStyle="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=66;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-5">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=66;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="1807.8" width="104.35050000000001" x="352.6324" y="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Webbrowser&#xa;(Patientensicht)" plantUmlId="p_79" plantUmlBaseStyle="shape=umlBoundary;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="Webbrowser&#xa;(Patientensicht)" id="TadifsUSA652-nzq5Avc-6">
+          <mxCell parent="TadifsUSA652-nzq5Avc-5" style="shape=umlBoundary;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="28" width="38" x="33.175250000000005" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Webbrowser&#xa;(Patientensicht)" plantUmlId="pf_80" plantUmlBaseStyle="shape=umlBoundary;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="Webbrowser&#xa;(Patientensicht)" id="TadifsUSA652-nzq5Avc-7">
+          <mxCell parent="TadifsUSA652-nzq5Avc-5" style="shape=umlBoundary;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="28" width="38" x="33.175250000000005" y="1779.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="pl_6" plantUmlBaseStyle="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=66;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-8">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=66;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="1807.8" width="114.63859999999998" x="776.116357142857" y="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="PatientController&#xa;(patient_bp)" plantUmlId="p_81" plantUmlBaseStyle="ellipse;shape=umlControl;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="PatientController&#xa;(patient_bp)" id="TadifsUSA652-nzq5Avc-9">
+          <mxCell parent="TadifsUSA652-nzq5Avc-8" style="ellipse;shape=umlControl;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="28" width="28" x="43.3193" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="PatientController&#xa;(patient_bp)" plantUmlId="pf_82" plantUmlBaseStyle="ellipse;shape=umlControl;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="PatientController&#xa;(patient_bp)" id="TadifsUSA652-nzq5Avc-10">
+          <mxCell parent="TadifsUSA652-nzq5Avc-8" style="ellipse;shape=umlControl;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="28" width="28" x="43.3193" y="1779.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="pl_7" plantUmlBaseStyle="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=66;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-11">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=66;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="1807.8" width="70.9569" x="1177.224214285714" y="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="TimeUtils&#xa;(app/utils)" plantUmlId="p_83" plantUmlBaseStyle="ellipse;shape=umlEntity;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="TimeUtils&#xa;(app/utils)" id="TadifsUSA652-nzq5Avc-12">
+          <mxCell parent="TadifsUSA652-nzq5Avc-11" style="ellipse;shape=umlEntity;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="28" width="28" x="21.478450000000066" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="TimeUtils&#xa;(app/utils)" plantUmlId="pf_84" plantUmlBaseStyle="ellipse;shape=umlEntity;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="TimeUtils&#xa;(app/utils)" id="TadifsUSA652-nzq5Avc-13">
+          <mxCell parent="TadifsUSA652-nzq5Avc-11" style="ellipse;shape=umlEntity;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="28" width="28" x="21.478450000000066" y="1779.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="pl_8" plantUmlBaseStyle="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=72;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-14">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=72;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="1819.8" width="83.63080000000001" x="1258.181114285714" y="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="SQLAlchemy&#xa;Session" plantUmlId="p_85" plantUmlBaseStyle="shape=cylinder3;size=6;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="SQLAlchemy&#xa;Session" id="TadifsUSA652-nzq5Avc-15">
+          <mxCell parent="TadifsUSA652-nzq5Avc-14" style="shape=cylinder3;size=6;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="34" width="36" x="23.815399999999954" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="SQLAlchemy&#xa;Session" plantUmlId="pf_86" plantUmlBaseStyle="shape=cylinder3;size=6;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="SQLAlchemy&#xa;Session" id="TadifsUSA652-nzq5Avc-16">
+          <mxCell parent="TadifsUSA652-nzq5Avc-14" style="shape=cylinder3;size=6;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="34" width="36" x="23.815399999999954" y="1785.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="pl_9" plantUmlBaseStyle="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=72;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-17">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="shape=umlLifeline;perimeter=lifelinePerimeter;participant=none;size=72;lifelineMirror=1;dashPattern=5 5;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;fillColor=none;strokeColor=#181818;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="1819.8" width="138.41379999999998" x="1730.7782285714286" y="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="SQLite DB&#xa;(medical_tracker.db)" plantUmlId="p_87" plantUmlBaseStyle="shape=cylinder3;size=6;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="SQLite DB&#xa;(medical_tracker.db)" id="TadifsUSA652-nzq5Avc-18">
+          <mxCell parent="TadifsUSA652-nzq5Avc-17" style="shape=cylinder3;size=6;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="34" width="36" x="51.206899999999905" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="SQLite DB&#xa;(medical_tracker.db)" plantUmlId="pf_88" plantUmlBaseStyle="shape=cylinder3;size=6;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" plantUmlBaseValue="SQLite DB&#xa;(medical_tracker.db)" id="TadifsUSA652-nzq5Avc-19">
+          <mxCell parent="TadifsUSA652-nzq5Avc-17" style="shape=cylinder3;size=6;verticalLabelPosition=top;verticalAlign=bottom;fillColor=#E2E2F0;strokeColor=#181818;fontColor=#000000;fontSize=14;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;part=1;" vertex="1">
+            <mxGeometry height="34" width="36" x="51.206899999999905" y="1785.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="grpframe_10" plantUmlBaseStyle="rounded=1;fillColor=none;strokeColor=#000000;strokeWidth=1.5;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-20">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=none;strokeColor=#000000;strokeWidth=1.5;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="83.5" width="492.06475714285705" x="766.116357142857" y="520" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="loop" plantUmlId="grptab_11" plantUmlBaseStyle="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=1.5;fontColor=#000000;fontSize=13;fontStyle=1;align=left;spacingLeft=10;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="loop" id="TadifsUSA652-nzq5Avc-21">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=1.5;fontColor=#000000;fontSize=13;fontStyle=1;align=left;spacingLeft=10;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="19.7" width="74.4467642857143" x="766.116357142857" y="520" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="[Für jedes Medikament in medikamente_liste]" plantUmlId="grpcond_12" plantUmlBaseStyle="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" plantUmlBaseValue="[Für jedes Medikament in medikamente_liste]" id="TadifsUSA652-nzq5Avc-22">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" vertex="1">
+            <mxGeometry height="15" width="265.37635" x="850.5631214285713" y="523" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="grpframe_13" plantUmlBaseStyle="rounded=1;fillColor=none;strokeColor=#000000;strokeWidth=1.5;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-23">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=none;strokeColor=#000000;strokeWidth=1.5;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="584.3" width="1113.0756714285712" x="766.116357142857" y="930.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="alt" plantUmlId="grptab_14" plantUmlBaseStyle="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=1.5;fontColor=#000000;fontSize=13;fontStyle=1;align=left;spacingLeft=10;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="alt" id="TadifsUSA652-nzq5Avc-24">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=1.5;fontColor=#000000;fontSize=13;fontStyle=1;align=left;spacingLeft=10;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="19.7" width="62.138642857142855" x="766.116357142857" y="930.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="[Einnahme noch nicht protokolliert (Erfolgsfall)]" plantUmlId="grpcond_15" plantUmlBaseStyle="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" plantUmlBaseValue="[Einnahme noch nicht protokolliert (Erfolgsfall)]" id="TadifsUSA652-nzq5Avc-25">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" vertex="1">
+            <mxGeometry height="15" width="279.75578571428565" x="838.2549999999999" y="933.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="grpelse_16" plantUmlBaseStyle="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;dashed=1;dashPattern=2 2;exitX=0;exitY=0.774;exitDx=0;exitDy=0;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-26">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-23" style="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;dashed=1;dashPattern=2 2;exitX=0;exitY=0.774;exitDx=0;exitDy=0;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="766.116357142857" y="1382.5" as="sourcePoint" />
+              <mxPoint x="1879.1920285714284" y="1382.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="[Datenbankfehler / Transaktionsabbruch (Rollback)]" plantUmlId="grpelselbl_17" plantUmlBaseStyle="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" plantUmlBaseValue="[Datenbankfehler / Transaktionsabbruch (Rollback)]" id="TadifsUSA652-nzq5Avc-27">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" vertex="1">
+            <mxGeometry height="15" width="305.0325285714285" x="771.116357142857" y="1384.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="grpframe_18" plantUmlBaseStyle="rounded=1;fillColor=none;strokeColor=#000000;strokeWidth=1.5;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-28">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=none;strokeColor=#000000;strokeWidth=1.5;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="71.5" width="304.6603285714285" x="766.116357142857" y="1162" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="alt" plantUmlId="grptab_19" plantUmlBaseStyle="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=1.5;fontColor=#000000;fontSize=13;fontStyle=1;align=left;spacingLeft=10;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="alt" id="TadifsUSA652-nzq5Avc-29">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=1.5;fontColor=#000000;fontSize=13;fontStyle=1;align=left;spacingLeft=10;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="19.7" width="62.138642857142855" x="766.116357142857" y="1162" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="[medikament_obj.bestand &amp;gt; 0]" plantUmlId="grpcond_20" plantUmlBaseStyle="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" plantUmlBaseValue="[medikament_obj.bestand &amp;gt; 0]" id="TadifsUSA652-nzq5Avc-30">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="text;html=1;fontColor=#000000;fontSize=11;fontStyle=1;align=left;verticalAlign=middle;" vertex="1">
+            <mxGeometry height="15" width="179.04693571428572" x="838.2549999999999" y="1165" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;1&lt;/b&gt; Klickt auf &amp;quot;Patientenansicht&amp;quot;" plantUmlId="msg_24" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;1&lt;/b&gt; Klickt auf &amp;quot;Patientenansicht&amp;quot;" id="TadifsUSA652-nzq5Avc-31">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-2" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-5">
+            <mxGeometry relative="1" x="-0.323" as="geometry">
+              <Array as="points">
+                <mxPoint x="255" y="185" />
+              </Array>
+              <mxPoint x="104.66850000000001" y="185" as="sourcePoint" />
+              <mxPoint x="404.80765" y="185" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;2&lt;/b&gt; GET /patient/" plantUmlId="msg_25" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;2&lt;/b&gt; GET /patient/" id="TadifsUSA652-nzq5Avc-32">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-5" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-71">
+            <mxGeometry relative="1" x="-0.734" as="geometry">
+              <Array as="points">
+                <mxPoint x="617" y="217" />
+              </Array>
+              <mxPoint x="404.80765" y="217" as="sourcePoint" />
+              <mxPoint x="828.435657142857" y="217" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;3&lt;/b&gt; Patient.query.first()" plantUmlId="msg_26" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;3&lt;/b&gt; Patient.query.first()" id="TadifsUSA652-nzq5Avc-33">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-71" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.681" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="249" />
+              </Array>
+              <mxPoint x="838.435657142857" y="249" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="249" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;4&lt;/b&gt; SELECT * FROM patient LIMIT 1;" plantUmlId="msg_27" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;4&lt;/b&gt; SELECT * FROM patient LIMIT 1;" id="TadifsUSA652-nzq5Avc-34">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-14" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-17">
+            <mxGeometry relative="1" x="-0.55" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="281" />
+              </Array>
+              <mxPoint x="1299.996514285714" y="281" as="sourcePoint" />
+              <mxPoint x="1799.9851285714285" y="281" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;5&lt;/b&gt; patient_obj" plantUmlId="msg_28" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;5&lt;/b&gt; patient_obj" id="TadifsUSA652-nzq5Avc-35">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-17" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="0.766" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="313" />
+              </Array>
+              <mxPoint x="1799.9851285714285" y="313" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="313" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;6&lt;/b&gt; EinnahmeProtokoll.query.filter(date == heute)" plantUmlId="msg_29" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;6&lt;/b&gt; EinnahmeProtokoll.query.filter(date == heute)" id="TadifsUSA652-nzq5Avc-36">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-71" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.311" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="345" />
+              </Array>
+              <mxPoint x="838.435657142857" y="345" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="345" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;7&lt;/b&gt; SELECT * FROM einnahme_protokolle WHERE date(zeitpunkt) = ?" plantUmlId="msg_30" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;7&lt;/b&gt; SELECT * FROM einnahme_protokolle WHERE date(zeitpunkt) = ?" id="TadifsUSA652-nzq5Avc-37">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-14" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-17">
+            <mxGeometry relative="1" x="-0.138" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="377" />
+              </Array>
+              <mxPoint x="1299.996514285714" y="377" as="sourcePoint" />
+              <mxPoint x="1799.9851285714285" y="377" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;8&lt;/b&gt; [einnahmen_liste]" plantUmlId="msg_31" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;8&lt;/b&gt; [einnahmen_liste]" id="TadifsUSA652-nzq5Avc-38">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-17" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="0.685" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="409" />
+              </Array>
+              <mxPoint x="1799.9851285714285" y="409" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="409" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;9&lt;/b&gt; Medikament.query.filter_by(patient_id)" plantUmlId="msg_32" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;9&lt;/b&gt; Medikament.query.filter_by(patient_id)" id="TadifsUSA652-nzq5Avc-39">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-71" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.415" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="441" />
+              </Array>
+              <mxPoint x="838.435657142857" y="441" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="441" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;10&lt;/b&gt; SELECT * FROM medikamente WHERE patient_id = ?" plantUmlId="msg_33" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;10&lt;/b&gt; SELECT * FROM medikamente WHERE patient_id = ?" id="TadifsUSA652-nzq5Avc-40">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-14" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-17">
+            <mxGeometry relative="1" x="-0.283" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="473" />
+              </Array>
+              <mxPoint x="1299.996514285714" y="473" as="sourcePoint" />
+              <mxPoint x="1799.9851285714285" y="473" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;11&lt;/b&gt; [medikamente_liste]" plantUmlId="msg_34" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;11&lt;/b&gt; [medikamente_liste]" id="TadifsUSA652-nzq5Avc-41">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-17" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="0.637" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="505" />
+              </Array>
+              <mxPoint x="1799.9851285714285" y="505" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="505" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;12&lt;/b&gt; ist_einnahme_ueberfaellig(tageszeit, eingenommen)" plantUmlId="msg_35" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;12&lt;/b&gt; ist_einnahme_ueberfaellig(tageszeit, eingenommen)" id="TadifsUSA652-nzq5Avc-42">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-71" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-11">
+            <mxGeometry relative="1" x="-0.029" as="geometry">
+              <Array as="points">
+                <mxPoint x="1026" y="563.5" />
+              </Array>
+              <mxPoint x="838.435657142857" y="563.5" as="sourcePoint" />
+              <mxPoint x="1212.702664285714" y="563.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;13&lt;/b&gt; boolean (ueberfaellig)" plantUmlId="msg_36" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;13&lt;/b&gt; boolean (ueberfaellig)" id="TadifsUSA652-nzq5Avc-43">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-11" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-71">
+            <mxGeometry relative="1" x="0.487" as="geometry">
+              <Array as="points">
+                <mxPoint x="1026" y="595.5" />
+              </Array>
+              <mxPoint x="1212.702664285714" y="595.5" as="sourcePoint" />
+              <mxPoint x="838.435657142857" y="595.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;14&lt;/b&gt; 200 OK (Render &#39;patient/tagesansicht.html&#39;)" plantUmlId="msg_37" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;14&lt;/b&gt; 200 OK (Render &#39;patient/tagesansicht.html&#39;)" id="TadifsUSA652-nzq5Avc-44">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-71" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-5">
+            <mxGeometry relative="1" x="0.216" as="geometry">
+              <Array as="points">
+                <mxPoint x="617" y="634.5" />
+              </Array>
+              <mxPoint x="828.435657142857" y="634.5" as="sourcePoint" />
+              <mxPoint x="404.80765" y="634.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;15&lt;/b&gt; Anzeige barrierefreie Tagesansicht" plantUmlId="msg_38" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;15&lt;/b&gt; Anzeige barrierefreie Tagesansicht&lt;br&gt;(Kacheln, Uhrzeit, offene Dosen)" id="TadifsUSA652-nzq5Avc-45">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-5" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-2">
+            <mxGeometry relative="1" x="0.087" as="geometry">
+              <Array as="points">
+                <mxPoint x="255" y="681.5" />
+              </Array>
+              <mxPoint x="404.80765" y="681.5" as="sourcePoint" />
+              <mxPoint x="104.66850000000001" y="681.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;16&lt;/b&gt; Klickt auf &amp;quot;Als eingenommen markieren&amp;quot;&lt;br&gt;(z.B. Ramipril 5mg, ID: 1)" plantUmlId="msg_42" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;16&lt;/b&gt; Klickt auf &amp;quot;Als eingenommen markieren&amp;quot;&lt;br&gt;(z.B. Ramipril 5mg, ID: 1)" id="TadifsUSA652-nzq5Avc-46">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-2" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-5">
+            <mxGeometry relative="1" x="-0.037" as="geometry">
+              <Array as="points">
+                <mxPoint x="255" y="772.5" />
+              </Array>
+              <mxPoint x="104.66850000000001" y="772.5" as="sourcePoint" />
+              <mxPoint x="404.80765" y="772.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;17&lt;/b&gt; POST /patient/einnehmen/1" plantUmlId="msg_43" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;17&lt;/b&gt; POST /patient/einnehmen/1&lt;br&gt;[Header: CSRF-Token]" id="TadifsUSA652-nzq5Avc-47">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-5" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-72">
+            <mxGeometry relative="1" x="-0.495" as="geometry">
+              <Array as="points">
+                <mxPoint x="617" y="819.5" />
+              </Array>
+              <mxPoint x="404.80765" y="819.5" as="sourcePoint" />
+              <mxPoint x="828.435657142857" y="819.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;18&lt;/b&gt; EinnahmeProtokoll.query.filter(med_id=1, date=heute).first()" plantUmlId="msg_44" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;18&lt;/b&gt; EinnahmeProtokoll.query.filter(med_id=1, date=heute).first()" id="TadifsUSA652-nzq5Avc-48">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.093" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="851.5" />
+              </Array>
+              <mxPoint x="838.435657142857" y="851.5" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="851.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;19&lt;/b&gt; SELECT id FROM einnahme_protokolle WHERE medikament_id=1 AND ..." plantUmlId="msg_45" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;19&lt;/b&gt; SELECT id FROM einnahme_protokolle WHERE medikament_id=1 AND ..." id="TadifsUSA652-nzq5Avc-49">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-14" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-17">
+            <mxGeometry relative="1" x="-0.022" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="883.5" />
+              </Array>
+              <mxPoint x="1299.996514285714" y="883.5" as="sourcePoint" />
+              <mxPoint x="1799.9851285714285" y="883.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;20&lt;/b&gt; None (noch nicht eingenommen)" plantUmlId="msg_46" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;20&lt;/b&gt; None (noch nicht eingenommen)" id="TadifsUSA652-nzq5Avc-50">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-17" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="0.479" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="915.5" />
+              </Array>
+              <mxPoint x="1799.9851285714285" y="915.5" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="915.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="msg_48" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;strokeColor=#181818;strokeWidth=1;exitX=1;exitY=0.275;exitDx=0;exitDy=0;curved=0;rounded=0;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-51">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;strokeColor=#181818;strokeWidth=1;exitX=1;exitY=0.275;exitDx=0;exitDy=0;curved=0;rounded=0;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points">
+                <mxPoint x="876.435657142857" y="1031" />
+                <mxPoint x="876.435657142857" y="1051" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1031" as="sourcePoint" />
+              <mxPoint x="841.435657142857" y="1051" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;21&lt;/b&gt; Instanziiere EinnahmeProtokoll(&lt;br&gt;patient_id, medikament_id=1, zeitpunkt=NOW)" plantUmlId="msglbl_51" plantUmlBaseStyle="text;html=1;fontColor=#000000;fontSize=13;align=left;verticalAlign=middle;" plantUmlBaseValue="&lt;b&gt;21&lt;/b&gt; Instanziiere EinnahmeProtokoll(&lt;br&gt;patient_id, medikament_id=1, zeitpunkt=NOW)" id="TadifsUSA652-nzq5Avc-52">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="text;html=1;fontColor=#000000;fontSize=13;align=left;verticalAlign=middle;" vertex="1">
+            <mxGeometry height="33" width="305.92662142857137" x="840.435657142857" y="996" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;22&lt;/b&gt; db.session.add(neues_protokoll)" plantUmlId="msg_52" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;22&lt;/b&gt; db.session.add(neues_protokoll)" id="TadifsUSA652-nzq5Avc-53">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.482" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="1083" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1083" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="1083" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;23&lt;/b&gt; Medikament.query.get(1)" plantUmlId="msg_53" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;23&lt;/b&gt; Medikament.query.get(1)" id="TadifsUSA652-nzq5Avc-54">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.582" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="1115" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1115" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="1115" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;24&lt;/b&gt; medikament_obj" plantUmlId="msg_54" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;24&lt;/b&gt; medikament_obj" id="TadifsUSA652-nzq5Avc-55">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-14" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-72">
+            <mxGeometry relative="1" x="0.654" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="1147" />
+              </Array>
+              <mxPoint x="1299.996514285714" y="1147" as="sourcePoint" />
+              <mxPoint x="838.435657142857" y="1147" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="msg_55" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;strokeColor=#181818;strokeWidth=1;curved=0;rounded=0;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-56">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;strokeColor=#181818;strokeWidth=1;curved=0;rounded=0;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points">
+                <mxPoint x="876.435657142857" y="1205.5" />
+                <mxPoint x="876.435657142857" y="1225.5" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1205.5" as="sourcePoint" />
+              <mxPoint x="841.435657142857" y="1225.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;25&lt;/b&gt; medikament_obj.bestand -= 1" plantUmlId="msglbl_58" plantUmlBaseStyle="text;html=1;fontColor=#000000;fontSize=13;align=left;verticalAlign=middle;" plantUmlBaseValue="&lt;b&gt;25&lt;/b&gt; medikament_obj.bestand -= 1" id="TadifsUSA652-nzq5Avc-57">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="text;html=1;fontColor=#000000;fontSize=13;align=left;verticalAlign=middle;" vertex="1">
+            <mxGeometry height="18" width="220.34102857142858" x="840.435657142857" y="1185.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;26&lt;/b&gt; db.session.commit()" plantUmlId="msg_59" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;26&lt;/b&gt; db.session.commit()" id="TadifsUSA652-nzq5Avc-58">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-74">
+            <mxGeometry relative="1" x="-0.645" as="geometry">
+              <Array as="points">
+                <mxPoint x="1067" y="1264.5" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1264.5" as="sourcePoint" />
+              <mxPoint x="1294.996514285714" y="1264.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;27&lt;/b&gt; BEGIN TRANSACTION;&lt;br&gt;INSERT INTO einnahme_protokolle ...;&lt;br&gt;UPDATE medikamente SET bestand = bestand - 1 ...;&lt;br&gt;COMMIT;" plantUmlId="msg_60" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;27&lt;/b&gt; BEGIN TRANSACTION;&lt;br&gt;INSERT INTO einnahme_protokolle ...;&lt;br&gt;UPDATE medikamente SET bestand = bestand - 1 ...;&lt;br&gt;COMMIT;" id="TadifsUSA652-nzq5Avc-59">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-74" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-17">
+            <mxGeometry relative="1" x="-0.297" as="geometry">
+              <Array as="points">
+                <mxPoint x="1552" y="1341.5" />
+              </Array>
+              <mxPoint x="1304.996514285714" y="1341.5" as="sourcePoint" />
+              <mxPoint x="1799.9851285714285" y="1341.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;28&lt;/b&gt; SUCCESS" plantUmlId="msg_61" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;28&lt;/b&gt; SUCCESS" id="TadifsUSA652-nzq5Avc-60">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-17" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-74">
+            <mxGeometry relative="1" x="0.779" as="geometry">
+              <Array as="points">
+                <mxPoint x="1552" y="1373.5" />
+              </Array>
+              <mxPoint x="1799.9851285714285" y="1373.5" as="sourcePoint" />
+              <mxPoint x="1304.996514285714" y="1373.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;29&lt;/b&gt; db.session.rollback()" plantUmlId="msg_62" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;29&lt;/b&gt; db.session.rollback()" id="TadifsUSA652-nzq5Avc-61">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.643" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="1422.8" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1422.8" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="1422.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;30&lt;/b&gt; ROLLBACK;" plantUmlId="msg_63" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;30&lt;/b&gt; ROLLBACK;" id="TadifsUSA652-nzq5Avc-62">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-14" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-17">
+            <mxGeometry relative="1" x="-0.79" as="geometry">
+              <Array as="points">
+                <mxPoint x="1550" y="1454.8" />
+              </Array>
+              <mxPoint x="1299.996514285714" y="1454.8" as="sourcePoint" />
+              <mxPoint x="1799.9851285714285" y="1454.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="msg_64" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;strokeColor=#181818;strokeWidth=1;exitX=1;exitY=0.866;exitDx=0;exitDy=0;curved=0;rounded=0;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-63">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;strokeColor=#181818;strokeWidth=1;exitX=1;exitY=0.866;exitDx=0;exitDy=0;curved=0;rounded=0;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points">
+                <mxPoint x="876.435657142857" y="1486.8" />
+                <mxPoint x="876.435657142857" y="1506.8" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1486.8" as="sourcePoint" />
+              <mxPoint x="841.435657142857" y="1506.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;31&lt;/b&gt; flash(&amp;quot;Fehler bei der Verbuchung&amp;quot;, &amp;quot;danger&amp;quot;)" plantUmlId="msglbl_67" plantUmlBaseStyle="text;html=1;fontColor=#000000;fontSize=13;align=left;verticalAlign=middle;" plantUmlBaseValue="&lt;b&gt;31&lt;/b&gt; flash(&amp;quot;Fehler bei der Verbuchung&amp;quot;, &amp;quot;danger&amp;quot;)" id="TadifsUSA652-nzq5Avc-64">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="text;html=1;fontColor=#000000;fontSize=13;align=left;verticalAlign=middle;" vertex="1">
+            <mxGeometry height="18" width="304.3144357142857" x="840.435657142857" y="1466.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;32&lt;/b&gt; 302 Found (Redirect to /patient/)" plantUmlId="msg_71" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;32&lt;/b&gt; 302 Found (Redirect to /patient/)" id="TadifsUSA652-nzq5Avc-65">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-72" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-5">
+            <mxGeometry relative="1" x="0.373" as="geometry">
+              <Array as="points">
+                <mxPoint x="617" y="1589.8" />
+              </Array>
+              <mxPoint x="828.435657142857" y="1589.8" as="sourcePoint" />
+              <mxPoint x="404.80765" y="1589.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;33&lt;/b&gt; GET /patient/" plantUmlId="msg_72" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;33&lt;/b&gt; GET /patient/" id="TadifsUSA652-nzq5Avc-66">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-5" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-73">
+            <mxGeometry relative="1" x="-0.714" as="geometry">
+              <Array as="points">
+                <mxPoint x="617" y="1621.8" />
+              </Array>
+              <mxPoint x="404.80765" y="1621.8" as="sourcePoint" />
+              <mxPoint x="828.435657142857" y="1621.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;34&lt;/b&gt; Aktualisierte Einnahmen &amp;amp; Bestände abfragen" plantUmlId="msg_73" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;34&lt;/b&gt; Aktualisierte Einnahmen &amp;amp; Bestände abfragen" id="TadifsUSA652-nzq5Avc-67">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-73" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-14">
+            <mxGeometry relative="1" x="-0.302" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="1653.8" />
+              </Array>
+              <mxPoint x="838.435657142857" y="1653.8" as="sourcePoint" />
+              <mxPoint x="1299.996514285714" y="1653.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;35&lt;/b&gt; Aktueller Zustand" plantUmlId="msg_74" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;35&lt;/b&gt; Aktueller Zustand" id="TadifsUSA652-nzq5Avc-68">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-14" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-73">
+            <mxGeometry relative="1" x="0.64" as="geometry">
+              <Array as="points">
+                <mxPoint x="1069" y="1685.8" />
+              </Array>
+              <mxPoint x="1299.996514285714" y="1685.8" as="sourcePoint" />
+              <mxPoint x="838.435657142857" y="1685.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;36&lt;/b&gt; 200 OK (HTML mit deaktivierter/grüner Bestätigungskachel)" plantUmlId="msg_75" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;36&lt;/b&gt; 200 OK (HTML mit deaktivierter/grüner Bestätigungskachel)" id="TadifsUSA652-nzq5Avc-69">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-73" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-5">
+            <mxGeometry relative="1" x="-0.021" as="geometry">
+              <Array as="points">
+                <mxPoint x="617" y="1717.8" />
+              </Array>
+              <mxPoint x="828.435657142857" y="1717.8" as="sourcePoint" />
+              <mxPoint x="404.80765" y="1717.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;37&lt;/b&gt; Visuelle Rückmeldung:&lt;br&gt;&amp;quot;Bereits eingenommen um HH:MM Uhr&amp;quot;" plantUmlId="msg_76" plantUmlBaseStyle="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="&lt;b&gt;37&lt;/b&gt; Visuelle Rückmeldung:&lt;br&gt;&amp;quot;Bereits eingenommen um HH:MM Uhr&amp;quot;" id="TadifsUSA652-nzq5Avc-70">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" source="TadifsUSA652-nzq5Avc-5" style="endArrow=classic;endFill=1;endSize=9;html=1;rounded=0;edgeStyle=none;curved=0;strokeColor=#181818;strokeWidth=1;fontColor=#000000;fontSize=13;verticalAlign=bottom;labelBackgroundColor=none;dashed=1;dashPattern=2 2;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="TadifsUSA652-nzq5Avc-2">
+            <mxGeometry relative="1" x="0.064" as="geometry">
+              <Array as="points">
+                <mxPoint x="255" y="1764.8" />
+              </Array>
+              <mxPoint x="404.80765" y="1764.8" as="sourcePoint" />
+              <mxPoint x="104.66850000000001" y="1764.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="act_0" plantUmlBaseStyle="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-71">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="417.5" width="10" x="828.435657142857" y="217" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="act_1" plantUmlBaseStyle="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-72">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="770.3" width="10" x="828.435657142857" y="819.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="act_2" plantUmlBaseStyle="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-73">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="96" width="10" x="828.435657142857" y="1621.8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="act_3" plantUmlBaseStyle="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-74">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#FFFFFF;strokeColor=#181818;strokeWidth=1;points=[];perimeter=orthogonalPerimeter;outlineConnect=0;portConstraint=eastwest;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="109" width="10" x="1294.996514285714" y="1264.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="divbar_21" plantUmlBaseStyle="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-75">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" style="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="30" y="140" as="sourcePoint" />
+              <mxPoint x="1874.1920285714284" y="140" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="divbar_22" plantUmlBaseStyle="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-76">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" style="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="30" y="143" as="sourcePoint" />
+              <mxPoint x="1874.1920285714284" y="143" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="1. Initiale Tagesansicht laden" plantUmlId="div_23" plantUmlBaseStyle="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=2;fontColor=#000000;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="1. Initiale Tagesansicht laden" id="TadifsUSA652-nzq5Avc-77">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=2;fontColor=#000000;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="25.7" width="214.25750714285712" x="844.9672607142857" y="127.1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="divbar_39" plantUmlBaseStyle="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-78">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" style="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="30" y="712.5" as="sourcePoint" />
+              <mxPoint x="1874.1920285714284" y="712.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="divbar_40" plantUmlBaseStyle="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-79">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" style="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="30" y="715.5" as="sourcePoint" />
+              <mxPoint x="1874.1920285714284" y="715.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="2. Einnahme bestätigen (Kernprozess GP-03)" plantUmlId="div_41" plantUmlBaseStyle="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=2;fontColor=#000000;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="2. Einnahme bestätigen (Kernprozess GP-03)" id="TadifsUSA652-nzq5Avc-80">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=2;fontColor=#000000;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="25.7" width="320.47177857142856" x="791.8601249999999" y="699.6" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Transaktionsstart (Atomarer Verbund nach GP-03 / FA-06 / FA-07)" plantUmlId="note_47" plantUmlBaseStyle="shape=note;size=10;fillColor=#EAFAF1;strokeColor=#181818;strokeWidth=0.5;fontColor=#000000;fontSize=13;align=left;spacingLeft=4;spacing=2;verticalAlign=middle;whiteSpace=wrap;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="Transaktionsstart (Atomarer Verbund nach GP-03 / FA-06 / FA-07)" id="TadifsUSA652-nzq5Avc-81">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="shape=note;size=10;fillColor=#EAFAF1;strokeColor=#181818;strokeWidth=0.5;fontColor=#000000;fontSize=13;align=left;spacingLeft=4;spacing=2;verticalAlign=middle;whiteSpace=wrap;html=1;rounded=1;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="27" width="506.560857142857" x="813.435657142857" y="955" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="divbar_68" plantUmlBaseStyle="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-82">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" style="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="30" y="1544.8" as="sourcePoint" />
+              <mxPoint x="1874.1920285714284" y="1544.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="divbar_69" plantUmlBaseStyle="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="" id="TadifsUSA652-nzq5Avc-83">
+          <mxCell edge="1" parent="TadifsUSA652-nzq5Avc-1" style="endArrow=none;html=1;strokeColor=#000000;strokeWidth=1;curved=0;rounded=0;endSize=6;fontSize=11;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="30" y="1547.8" as="sourcePoint" />
+              <mxPoint x="1874.1920285714284" y="1547.8" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="3. Post-Redirect-Get &amp;amp; UI-Aktualisierung" plantUmlId="div_70" plantUmlBaseStyle="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=2;fontColor=#000000;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" plantUmlBaseValue="3. Post-Redirect-Get (PRG) &amp;amp; UI-Aktualisierung" id="TadifsUSA652-nzq5Avc-84">
+          <mxCell parent="TadifsUSA652-nzq5Avc-1" style="rounded=1;fillColor=#EEEEEE;strokeColor=#000000;strokeWidth=2;fontColor=#000000;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;html=1;arcSize=6;absoluteArcSize=1;shadow=0;" vertex="1">
+            <mxGeometry height="25.7" width="337.02152142857165" x="783.5852535714284" y="1531.8999999999999" as="geometry" />
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

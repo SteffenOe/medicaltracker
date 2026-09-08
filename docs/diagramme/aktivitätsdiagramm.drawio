@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Seite-1" id="T4nV82cR2uyrsteryejO">
+    <mxGraphModel dx="2934" dy="1104" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-1" parent="1" style="swimlane;startSize=40;fillColor=#e8f4f8;strokeColor=#b0c4de;html=1;fontStyle=1;align=center;" value="Nutzer (UI / Frontend)" vertex="1">
+          <mxGeometry height="1020" width="320" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-2" parent="mOBVL3YFEc5NL5Xgjlgr-1" style="ellipse;fillColor=#000000;strokeColor=none;html=1;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="140" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-3" parent="mOBVL3YFEc5NL5Xgjlgr-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Tagesansicht aufrufen" vertex="1">
+          <mxGeometry height="60" width="140" x="90" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-4" parent="mOBVL3YFEc5NL5Xgjlgr-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Anstehende Einnahmen für heute betrachten" vertex="1">
+          <mxGeometry height="60" width="140" x="90" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-5" parent="mOBVL3YFEc5NL5Xgjlgr-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Einnahme einer Dosis bestätigen" vertex="1">
+          <mxGeometry height="60" width="140" x="90" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-6" parent="mOBVL3YFEc5NL5Xgjlgr-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Aktualisierte Ansicht mit Einnahmebestätigung anzeigen" vertex="1">
+          <mxGeometry height="60" width="140" x="90" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-7" parent="mOBVL3YFEc5NL5Xgjlgr-1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="140" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-8" parent="1" style="swimlane;startSize=40;fillColor=#fff0e6;strokeColor=#f4a460;html=1;fontStyle=1;align=center;" value="MedicalTracker (System / Backend)" vertex="1">
+          <mxGeometry height="1020" width="360" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-9" parent="mOBVL3YFEc5NL5Xgjlgr-8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Einnahmezeitstempel in Historie protokollieren" vertex="1">
+          <mxGeometry height="60" width="140" x="110" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-10" parent="mOBVL3YFEc5NL5Xgjlgr-8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Bestand reduzieren&lt;br&gt;(bestand = bestand - 1)" vertex="1">
+          <mxGeometry height="60" width="140" x="110" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-11" parent="mOBVL3YFEc5NL5Xgjlgr-8" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#d6b656;html=1;" value="bestand &amp;lt;= mindestbestand?" vertex="1">
+          <mxGeometry height="80" width="140" x="110" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-12" parent="mOBVL3YFEc5NL5Xgjlgr-8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Visuellen Nachbestell-Warnhinweis auf Dashboard setzen" vertex="1">
+          <mxGeometry height="60" width="140" x="20" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-13" parent="mOBVL3YFEc5NL5Xgjlgr-8" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffcc;strokeColor=#d6b656;html=1;" value="" vertex="1">
+          <mxGeometry height="80" width="140" x="110" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-14" parent="mOBVL3YFEc5NL5Xgjlgr-8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;html=1;" value="Datenbank-Transaktion committen (speichern)" vertex="1">
+          <mxGeometry height="60" width="140" x="110" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-15" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-16" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-17" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-18" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-19" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-20" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-21" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;labelPosition=left;verticalLabelPosition=top;align=right;verticalAlign=bottom;" target="mOBVL3YFEc5NL5Xgjlgr-12" value="[bestand &amp;lt;= mindestbestand]">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-22" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#ffffff;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="mOBVL3YFEc5NL5Xgjlgr-13" value="[bestand &amp;gt; mindestbestand]">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-23" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-24" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-25" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mOBVL3YFEc5NL5Xgjlgr-26" edge="1" parent="1" source="mOBVL3YFEc5NL5Xgjlgr-6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" target="mOBVL3YFEc5NL5Xgjlgr-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -7,9 +7,8 @@ class Patient(db.Model):
     vorname = db.Column(db.String(100), nullable=False)
     nachname = db.Column(db.String(100), nullable=False)
     geburtsdatum = db.Column(db.Date, nullable=False)
-    notfallkontakt = db.Column(db.String(150), nullable=True)
+    notfallkontakt = db.Column(db.String(200), nullable=True)
 
-    # 1:n Beziehungen zu abhängigen Entitäten (mit Kaskadierung)
     medikamente = db.relationship('Medikament', backref='patient', lazy=True, cascade="all, delete-orphan")
     einnahmen = db.relationship('EinnahmeProtokoll', backref='patient', lazy=True, cascade="all, delete-orphan")
     vitalwerte = db.relationship('Vitalwert', backref='patient', lazy=True, cascade="all, delete-orphan")
