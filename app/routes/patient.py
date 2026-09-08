@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash
 from app import db
 from app.models import Patient, Medikament, EinnahmeProtokoll, Termin
 from app.utils import ist_einnahme_ueberfaellig
+from app.forms import PatientForm
 
 patient_bp = Blueprint('patient', __name__, url_prefix='/patient')
 
@@ -111,3 +112,30 @@ def termin_erledigen(termin_id):
     db.session.commit()
     
     return redirect(url_for('patient.tagesansicht'))
+
+
+@patient_bp.route('/profil', methods=['GET', 'POST'])
+def profil():
+    """Erfasst oder bearbeitet die Stammdaten der zu pflegenden Person."""
+    patient = Patient.query.first()
+    
+    form = PatientForm(obj=patient) if patient else PatientForm()
+
+    if form.validate_on_submit():
+        if not patient:
+            patient = Patient(
+                vorname=form.vorname.data.strip(),
+                nachname=form.nachname.data.strip(),
+                geburtsdatum=form.geburtsdatum.data,
+                notfallkontakt=form.notfallkontakt.data.strip()
+            )
+            db.session.add(patient)
+            flash(f'Patient {patient.vorname} {patient.nachname} erfolgreich angelegt.', 'success')
+        else:
+            form.populate_obj(patient)
+            flash('Patientenstammdaten erfolgreich aktualisiert.', 'success')
+
+        db.session.commit()
+        return redirect(url_for('main.dashboard'))
+
+    return render_template('patient/profil.html', form=form, patient=patient)

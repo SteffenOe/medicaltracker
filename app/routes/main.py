@@ -1,6 +1,6 @@
 from datetime import date
 import locale
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, flash
 from app import db
 from app.models import Patient, Medikament, Vitalwert, Termin, EinnahmeProtokoll
 from app.utils import ist_einnahme_ueberfaellig
@@ -14,6 +14,11 @@ main_bp = Blueprint('main', __name__)
 def dashboard():    
     """Dashboard Layout"""
     patient = Patient.query.first()
+    if not patient:
+            flash('Willkommen beim Medical Tracker! Bitte erfassen Sie zunächst die Stammdaten der zu pflegenden Person.', 'info')
+            return redirect(url_for('patient.profil'))
+
+
     heute = date.today()
     
     medikamente = []

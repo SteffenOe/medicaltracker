@@ -59,6 +59,12 @@
                   <i class="bi bi-file-earmark-pdf"></i> PDF-Arztbericht
               </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'patient.profil' %}active{% endif %}" 
+              href="{{ url_for('patient.profil') }}">
+                <i class="bi bi-person-gear"></i> Patientenprofil
+            </a>
+        </li>
         </ul>
       </nav>
 
