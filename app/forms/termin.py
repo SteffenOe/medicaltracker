@@ -3,7 +3,7 @@ from wtforms.fields import  StringField, SelectField, SubmitField, DateTimeLocal
 from wtforms.validators import DataRequired, Length
 
 class TerminForm(FlaskForm):
-    """Formular zur Erfassung und Bearbeitung von Pflegeterminen (FA-04)."""
+    """Formular zur Erfassung und Bearbeitung von Pflegeterminen."""
     titel = StringField('Titel / Beschreibung', validators=[
         DataRequired(message="Bitte geben Sie einen Titel für den Termin ein."),
         Length(max=200, message="Der Titel darf maximal 200 Zeichen lang sein.")
