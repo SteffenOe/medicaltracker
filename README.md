@@ -1,6 +1,6 @@
 # Medical Tracker – Digitales Assistenzsystem für den Pflegealltag
 
-[![Python](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.14%2B-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-Flask%203.1%2B-lightgrey.svg)](https://flask.palletsprojects.com/)
 [![Database](https://img.shields.io/badge/Database-SQLite%203-green.svg)](https://www.sqlite.org/)
 [![UI](https://img.shields.io/badge/UI-Bootstrap%205%20%7C%20WCAG%202.2-purple.svg)](https://getbootstrap.com/)
