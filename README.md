@@ -9,7 +9,7 @@
 > **Wissenschaftliches Entwicklungsprojekt im Modul DLMCSPSE01_D – Projekt: Software Engineering**  
 > Master of Science Informatik, IU Internationale Hochschule  
 > **Autor:** Steffen Niklas Oehler (Matrikelnummer: IU14142306)  
-> **Betreuer / Tutor:** Prof. Dr. Dirk Simon
+> **Tutor:** Prof. Dr. Dirk Simon
 
 ---
 
