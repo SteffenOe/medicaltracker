@@ -36,6 +36,12 @@ class VitalwertForm(FlaskForm):
             if self.systolisch.data is None or self.diastolisch.data is None:
                 self.systolisch.errors.append("Für die Blutdruckmessung müssen Systole und Diastole angegeben werden.")
                 return False
+            if not (30.0 <= self.systolisch.data <= 300.0):
+                self.systolisch.errors.append("Systole muss zwischen 30 und 300 mmHg liegen.")
+                return False
+            if not (30.0 <= self.diastolisch.data <= 300.0):
+                self.diastolisch.errors.append("Diastole muss zwischen 30 und 300 mmHg liegen.")
+                return False
             if self.systolisch.data <= self.diastolisch.data:
                 self.systolisch.errors.append("Plausibilitätsfehler: Der systolische Wert muss größer als der diastolische Wert sein.")
                 return False

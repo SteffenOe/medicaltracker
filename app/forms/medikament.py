@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms.fields import StringField, IntegerField, SelectField, SubmitField
-from wtforms.validators import DataRequired, NumberRange, Length
+from wtforms.validators import DataRequired, InputRequired, NumberRange, Length
 
 class MedikamentForm(FlaskForm):
     """Formular zur Erfassung und Bearbeitung von Medikamenten."""
@@ -24,12 +24,12 @@ class MedikamentForm(FlaskForm):
 
     # Geschäftsregel GR-01: Bestände dürfen niemals negativ sein
     bestand = IntegerField('Aktueller Bestand (Packungsinhalt)', validators=[
-        DataRequired(message="Bitte erfassen Sie den Anfangsbestand."),
+        InputRequired(message="Bitte erfassen Sie den Anfangsbestand."),
         NumberRange(min=0, message="Der Bestand darf nicht negativ sein.")
     ], default=20)
  
     mindestbestand = IntegerField('Mindestbestand (Warnschwelle)', validators=[
-        DataRequired(message="Bitte definieren Sie einen Mindestbestand."),
+        InputRequired(message="Bitte definieren Sie einen Mindestbestand."),
         NumberRange(min=0, message="Der Mindestbestand darf nicht negativ sein.")
     ], default=5)
   
